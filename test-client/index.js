@@ -34,7 +34,7 @@ const repl = () => {
 		const url = split[1];
 		const content = eval(cmd.slice(method.length + 1 + url.length + 1));
 		const fetch_response = await fetch('http://localhost:9000' + url, { method, ...(method == 'GET' || method == 'HEAD' ? {} : { body: encode(content) }) });
-		if (fetch_response.status >= 200 && fetch_response.status < 300) {
+		if (fetch_response.status >= 200 && fetch_response.status < 300 && fetch_response.status !== 204) {
 			const decoded = decode(await fetch_response.arrayBuffer());
 			console.info(decoded);
 		} else {
