@@ -14,6 +14,7 @@ namespace Status {
 	}
 std::unordered_map<code_t, std::string> const strings{
 	STATUS_CODE(OK, "OK"),
+	STATUS_CODE(NO_CONTENT, "No Content"),
 	STATUS_CODE(BAD_REQUEST, "Bad Request"),
 	STATUS_CODE(UNAUTHORIZED, "Unauthorized"),
 	STATUS_CODE(FORBIDDEN, "Forbidden"),
