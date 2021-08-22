@@ -1,0 +1,6 @@
+[submodule "server/lib/bcrypt"]
+	path = server/lib/bcrypt
+	url = https://github.com/trusch/libbcrypt.git
+[submodule "client/lib/TermOx"]
+	path = client/lib/TermOx
+	url = https://github.com/mattfbacon/TermOx.git
