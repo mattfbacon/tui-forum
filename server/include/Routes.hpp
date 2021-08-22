@@ -65,13 +65,11 @@ extern Route param_delete;
 extern Route param_patch;
 }  // namespace posts
 
+void send_code_handler(Response& res, HTTP::Status::code_t const code);
 template <HTTP::Status::code_t code>
 __attribute__((nonnull(1))) void send_code_handler(Response* const res, Request* const = nullptr) {
-	res->writeStatus(HTTP_STATUS(code));
-	res->write(HTTP_STATUS(code));
-	res->end();
+	send_code_handler(*res, code);
 }
-void send_code_handler(Response& res, HTTP::Status::code_t const code);
 
 uWS::App&& register_all(uWS::App&& app);
 
