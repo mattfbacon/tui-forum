@@ -128,7 +128,7 @@ T&& unwrap(std::optional<T>&& x_opt, EArgs... e_args) {
 	if (!x_opt.has_value()) {
 		throw E{ e_args... };
 	}
-	return std::forward<T>(*x_opt);
+	return std::move(*x_opt);
 }
 
 // uses clog because it's buffered
