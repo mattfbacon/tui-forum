@@ -116,7 +116,7 @@ bool User::delete_by_id(id_t const id) {
 	auto const deleted_rows = results->getUInt64(1);
 	// effectively asserts that id is unique
 	assert(deleted_rows == 0 || deleted_rows == 1);
-	// assert that it doesn't have more than one row
+	// assert that the row_count result doesn't have more than one row (will be a no-op in release mode)
 	assert(!results->next());
 	// effectively returns whether the row was found and and deleted
 	return deleted_rows == 1;
