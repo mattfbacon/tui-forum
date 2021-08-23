@@ -112,7 +112,7 @@ void param_delete(Response* const res, Request* const req) {
 	}
 }
 
-uWS::App&& register_all(uWS::App&& app) {
+ROUTES_REGISTERER_IMPL(app) {
 	return app.any(path, send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).get(path, param_get).patch(path, param_patch).del(path, param_delete);
 }
 

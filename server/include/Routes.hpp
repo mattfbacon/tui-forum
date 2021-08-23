@@ -11,10 +11,14 @@ class HttpResponse;
 #include "Config.hpp"
 #include "HTTP.hpp"
 
+#define ROUTES_CUSTOM_REGISTERER_IMPL(NAME, PARAM) uWS::App&& register_##NAME(uWS::App&& PARAM)
+#define ROUTES_REGISTERER_IMPL(PARAM) ROUTES_CUSTOM_REGISTERER_IMPL(all, PARAM)
+
 namespace Routes {
 using Request = uWS::HttpRequest;
 using Response = uWS::HttpResponse<WebConfig::USE_SSL>;
 using Route = void(Response* res, Request* req);
+#define REGISTERER(NAME) ROUTES_CUSTOM_REGISTERER_IMPL(NAME, )
 
 namespace users {
 
@@ -35,7 +39,7 @@ extern Route param_patch;
 // delete user by id
 extern Route param_delete;
 
-uWS::App&& register_all(uWS::App&& app);
+REGISTERER(all);
 }  // namespace id
 
 namespace username {
@@ -71,6 +75,9 @@ __attribute__((nonnull(1))) void send_code_handler(Response* const res, Request*
 	send_code_handler(*res, code);
 }
 
-uWS::App&& register_all(uWS::App&& app);
+REGISTERER(404_handler);
+REGISTERER(all);
 
 }  // namespace Routes
+
+#undef REGISTERER
