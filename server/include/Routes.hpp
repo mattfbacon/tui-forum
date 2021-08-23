@@ -47,10 +47,10 @@ namespace username {
 extern Route param_get;
 }  // namespace username
 
-namespace displayname {
+namespace display_name {
 // get user(s) by display name
 extern Route param_get;
-}  // namespace displayname
+}  // namespace display_name
 
 // create a new user
 extern Route post;
