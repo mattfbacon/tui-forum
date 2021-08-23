@@ -45,7 +45,7 @@ void param_get(Response* const res, Request* const req) {
 	} catch (HTTP::StatusException const& e) {
 		return send_code_handler(*res, e.code);
 	} catch (std::exception const& e) {
-		std::cerr << __FILE__ << ':' << __LINE__ << ' ' << __PRETTY_FUNCTION__ << " exception: " << e.what() << std::endl;
+		CERR_EXCEPTION(e);
 		return send_code_handler(*res, HTTP::Status::INTERNAL_SERVER_ERROR);
 	}
 }
@@ -87,7 +87,7 @@ void param_patch(Response* const res, Request* const req) {
 			} catch (HTTP::StatusException const& e) {
 				return send_code_handler(*res, e.code);
 			} catch (std::exception const& e) {
-				std::cerr << __FILE__ << ':' << __LINE__ << ' ' << __PRETTY_FUNCTION__ << " exception: " << e.what() << std::endl;
+				CERR_EXCEPTION(e);
 				return send_code_handler(*res, HTTP::Status::INTERNAL_SERVER_ERROR);
 			}
 		}

@@ -130,3 +130,6 @@ T&& unwrap(std::optional<T>&& x_opt, EArgs... e_args) {
 	}
 	return std::forward<T>(*x_opt);
 }
+
+// uses clog because it's buffered
+#define CERR_EXCEPTION(e) std::clog << __FILE__ << ':' << __LINE__ << ' ' << __PRETTY_FUNCTION__ << " exception: " << e.what() << std::endl
