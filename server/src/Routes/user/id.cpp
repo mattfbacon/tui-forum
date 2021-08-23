@@ -94,8 +94,26 @@ void param_patch(Response* const res, Request* const req) {
 	});
 }
 
+void param_delete(Response* const res, Request* const req) {
+	// TODO when auth is added: check that id is the user's id, otherwise send 403
+	try {
+		auto const user_id = user_id_from_param(req->getParameter(0));
+		auto const deleted = ORM::User::delete_by_id(user_id);
+		if (deleted) {
+			return send_code_handler(*res, HTTP::Status::NO_CONTENT);
+		} else {
+			throw HTTP::StatusException{ HTTP::Status::NOT_FOUND };
+		}
+	} catch (HTTP::StatusException const& e) {
+		return send_code_handler(*res, e.code);
+	} catch (std::exception const& e) {
+		CERR_EXCEPTION(e);
+		return send_code_handler(*res, HTTP::Status::INTERNAL_SERVER_ERROR);
+	}
+}
+
 uWS::App&& register_all(uWS::App&& app) {
-	return app.any(path, send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).get(path, param_get).patch(path, param_patch) /* TODO .delete("/user/id/:id", param_delete) */;
+	return app.any(path, send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).get(path, param_get).patch(path, param_patch).del(path, param_delete);
 }
 
 }  // namespace id
