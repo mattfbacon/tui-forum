@@ -21,6 +21,7 @@ inline bool is_digits(std::string_view const s) {
 
 namespace Strings {
 extern std::string const SELF;
+extern std::string const SQL_GET_ROW_COUNT;
 }  // namespace Strings
 
 std::string sqlstr_to_str(sql::SQLString const& str);

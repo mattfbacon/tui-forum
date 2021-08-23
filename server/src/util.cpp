@@ -33,6 +33,7 @@ char const* StatusException::what() const noexcept {
 
 namespace Strings {
 std::string const SELF = "self";
+std::string const SQL_GET_ROW_COUNT = "select row_count()";
 }  // namespace Strings
 
 std::string sqlstr_to_str(sql::SQLString const& str) {
