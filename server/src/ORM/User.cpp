@@ -15,6 +15,7 @@ std::string const User::SQL_FETCH_BY_DISPLAY_NAME = "select id, username, passwo
 std::string const User::SQL_UPDATE_DISPLAY_NAME_PASSWORD = "update users set display_name = ?, password = ? where id = ?";
 std::string const User::SQL_UPDATE_DISPLAY_NAME = "update users set display_name = ? where id = ?";
 std::string const User::SQL_UPDATE_PASSWORD = "update users set password = ? where id = ?";
+std::string const User::SQL_DELETE_BY_ID = "delete from users where id = ?";
 
 User::User() {
 	// zero-initialize/default-construct all members
@@ -97,5 +98,27 @@ std::vector<User> User::get_by_display_name(sql::SQLString const& display_name) 
 		ret.emplace_back(results->getUInt64("id"), results->getString("username"), results->getString("password"), display_name);
 	}
 	return ret;
+}
+bool User::delete_by_id(id_t const id) {
+	std::unique_ptr<sql::ResultSet> results;
+	{
+		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_DELETE_BY_ID) };
+		stmt->setUInt64(1, id);
+		stmt->execute();
+	}
+	{
+		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(Strings::SQL_GET_ROW_COUNT) };
+		results.reset(stmt->executeQuery());
+	}
+	bool const has_at_least_one_row = results->next();
+	assert(has_at_least_one_row);
+	// row_count() returns unsigned long long, but there is no appropriate accessor function, so use uint64_t
+	auto const deleted_rows = results->getUInt64(1);
+	// effectively asserts that id is unique
+	assert(deleted_rows == 0 || deleted_rows == 1);
+	// assert that it doesn't have more than one row
+	assert(!results->next());
+	// effectively returns whether the row was found and and deleted
+	return deleted_rows == 1;
 }
 }  // namespace ORM

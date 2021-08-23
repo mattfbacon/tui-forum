@@ -46,6 +46,7 @@ public:
 	static std::optional<User> get_by_id(id_t id);
 	static std::optional<User> get_by_name(sql::SQLString const& username);
 	static std::vector<User> get_by_display_name(sql::SQLString const& display_name);
+	static bool delete_by_id(id_t id);
 protected:
 	// even though it should be, it can't be const due to msgpack weirdness
 	id_t m_id;
@@ -62,6 +63,7 @@ protected:
 	static std::string const SQL_UPDATE_DISPLAY_NAME_PASSWORD;
 	static std::string const SQL_UPDATE_DISPLAY_NAME;
 	static std::string const SQL_UPDATE_PASSWORD;
+	static std::string const SQL_DELETE_BY_ID;
 public:
 	MSGPACK_DEFINE(m_id, m_username, m_display_name)
 };
