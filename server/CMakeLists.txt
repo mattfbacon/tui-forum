@@ -38,23 +38,26 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
 	-fuse-ld=lld \
 	")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-	-Wall -Wextra -Wno-unknown-pragmas -pedantic \
-	-Wno-enum-compare -Wno-gnu-zero-variadic-macro-arguments \
-	-Wno-c++11-extensions -Wno-c++14-extensions \
-	-Wno-c++17-extensions -Wno-c++20-extensions \
+	-Wall -Wextra -Wno-unknown-pragmas \
+	-Wcpp \
+	-Wno-enum-compare \
 	-fno-rtti -fexceptions \
-	-Wno-unused-command-line-argument \
 	-DMSGPACK_DISABLE_LEGACY_CONVERT \
 	")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto -fcolor-diagnostics")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto -fcolor-diagnostics \
+		-Wno-gnu-zero-variadic-macro-arguments \
+		-Wno-c++11-extensions -Wno-c++14-extensions \
+		-Wno-c++17-extensions -Wno-c++20-extensions \
+		-Wno-unused-command-line-argument \
+		")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color")
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
 	-fno-omit-frame-pointer -fstack-protector-strong \
-	-Og -ggdb3 -Werror -Wfatal-errors \
+	-Og -ggdb3 -Werror -Wfatal-errors -Wno-error=cpp -Wno-error=pedantic \
 	")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
@@ -96,7 +99,7 @@ endif()
 
 add_library(msgpack INTERFACE)
 target_include_directories(msgpack INTERFACE SYSTEM /usr/include/boost)
-target_include_directories(msgpack INTERFACE /usr/include/msgpack)
+# target_include_directories(msgpack INTERFACE /usr/include/msgpack)
 
 include(${DIR_LIB}/bcrypt.cmake)
 
