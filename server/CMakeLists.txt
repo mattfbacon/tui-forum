@@ -17,8 +17,13 @@ set (sources
 	your_stdlib_is_garbage.cpp
 	Config.cpp
 	threadlocal.cpp
-	Routes/users/id.cpp
 	Routes/common.cpp
+	Routes/users.cpp
+	Routes/posts.cpp
+	Routes/users/id.cpp
+	Routes/users/username.cpp
+	Routes/users/display_name.cpp
+	Routes/users/session.cpp
 	util.cpp
 	ORM/User.cpp
 	)

@@ -13,65 +13,104 @@ class HttpResponse;
 
 #define ROUTES_CUSTOM_REGISTERER_IMPL(NAME, PARAM) uWS::App&& register_##NAME(uWS::App&& PARAM)
 #define ROUTES_REGISTERER_IMPL(PARAM) ROUTES_CUSTOM_REGISTERER_IMPL(all, PARAM)
+#define ROUTE_IMPL_NOEXCEPT(NAME, PARAM_RES, PARAM_REQ) __attribute__((nonnull(1))) void NAME(Response* const PARAM_RES, Request* const PARAM_REQ)
+#define HTTP_EXCEPT_WRAP_BEGIN try {
+#define HTTP_EXCEPT_WRAP_END_MINIMAL \
+	} \
+	catch (HTTP::StatusException const& e) { \
+		return send_code_handler(*res, e.code); \
+	} \
+	catch (std::exception const& e) { \
+		CERR_EXCEPTION(e); \
+		return send_code_handler(*res, HTTP::Status::INTERNAL_SERVER_ERROR); \
+	}
+#define HTTP_EXCEPT_WRAP_END \
+	} \
+	catch (msgpack::parse_error const&) { \
+		return send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
+	} \
+	catch (msgpack::type_error const&) { \
+		return send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
+	} \
+	catch (msgpack::unpack_error const&) { \
+		return send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
+		HTTP_EXCEPT_WRAP_END_MINIMAL
+#define ROUTE_IMPL_BEGIN(NAME, PARAM_RES, PARAM_REQ) \
+	ROUTE_IMPL_NOEXCEPT(NAME, PARAM_RES, PARAM_REQ) { \
+		HTTP_EXCEPT_WRAP_BEGIN
+#define ROUTE_IMPL_END \
+	HTTP_EXCEPT_WRAP_END \
+	}
 
 namespace Routes {
 using Request = uWS::HttpRequest;
 using Response = uWS::HttpResponse<WebConfig::USE_SSL>;
 using Route = void(Response* res, Request* req);
 #define REGISTERER(NAME) ROUTES_CUSTOM_REGISTERER_IMPL(NAME, )
+#define ROUTE(NAME) extern Route NAME __attribute__((nonnull(1, 2)));
 
 namespace users {
 
 namespace session {
 // get existing session
-extern Route get __attribute__((nonnull(1, 2)));
+ROUTE(get);
 // create a new session
-extern Route post;
+ROUTE(post);
 // delete the current session (log out)
-extern Route delete_;
+ROUTE(delete_);
+
+REGISTERER(all);
 }  // namespace session
 
 namespace id {
 // get user by id
-extern Route param_get;
+ROUTE(param_get);
 // edit user by id
-extern Route param_patch;
+ROUTE(param_patch);
 // delete user by id
-extern Route param_delete;
+ROUTE(param_delete);
 
 REGISTERER(all);
 }  // namespace id
 
 namespace username {
 // get user by username
-extern Route param_get;
+ROUTE(param_get);
+
+REGISTERER(all);
 }  // namespace username
 
 namespace display_name {
 // get user(s) by display name
-extern Route param_get;
+ROUTE(param_get);
+
+REGISTERER(all);
 }  // namespace display_name
 
 // create a new user
-extern Route post;
+ROUTE(post);
+
+REGISTERER(all);
 }  // namespace users
 
 namespace posts {
 // search posts
-extern Route get;
+ROUTE(get);
 // get post by id
-extern Route param_get;
+ROUTE(param_get);
 // create new post
-extern Route post;
+ROUTE(post);
 // delete post by id
-extern Route param_delete;
+ROUTE(param_delete);
 // edit post by id
-extern Route param_patch;
+ROUTE(param_patch);
+
+REGISTERER(all);
 }  // namespace posts
 
 void send_code_handler(Response& res, HTTP::Status::code_t const code);
 template <HTTP::Status::code_t code>
-__attribute__((nonnull(1))) void send_code_handler(Response* const res, Request* const = nullptr) {
+ROUTE_IMPL_NOEXCEPT(send_code_handler, res, = nullptr) {
 	send_code_handler(*res, code);
 }
 
@@ -81,3 +120,4 @@ REGISTERER(all);
 }  // namespace Routes
 
 #undef REGISTERER
+#undef ROUTE

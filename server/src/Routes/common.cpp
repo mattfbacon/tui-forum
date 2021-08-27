@@ -14,7 +14,16 @@ ROUTES_CUSTOM_REGISTERER_IMPL(404_handler, app) {
 	return app.any(splat_route, send_code_handler<HTTP::Status::NOT_FOUND>);
 }
 ROUTES_REGISTERER_IMPL(app) {
-	// TODO when handlers are implemented: add here
-	return register_404_handler(users::id::register_all(std::move(app)));
+	// clang-format off
+	return
+		register_404_handler(
+		posts::register_all(
+		users::register_all(
+			std::move(app)
+		)
+		)
+		)
+		;
+	// clang-format on
 }
 }  // namespace Routes
