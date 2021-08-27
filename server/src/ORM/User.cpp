@@ -95,7 +95,8 @@ std::vector<User> User::get_by_display_name(sql::SQLString const& display_name) 
 	}
 	std::vector<User> ret{ results->rowsCount() };
 	while (results->next()) {
-		ret.emplace_back(results->getUInt64("id"), results->getString("username"), results->getString("password"), display_name);
+		// FIXME: figure out why emplace_back doesn't work
+		ret.push_back(User{ results->getUInt64("id"), results->getString("username"), results->getString("password"), display_name });
 	}
 	return ret;
 }
