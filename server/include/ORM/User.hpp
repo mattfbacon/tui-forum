@@ -47,6 +47,7 @@ public:
 	static std::optional<User> get_by_name(sql::SQLString const& username);
 	static std::vector<User> get_by_display_name(sql::SQLString const& display_name);
 	static bool delete_by_id(id_t id);
+	static std::optional<id_t> id_from_param(std::string_view const param, ORM::User::id_t const self_id);
 protected:
 	// even though it should be, it can't be const due to msgpack weirdness
 	id_t m_id;
