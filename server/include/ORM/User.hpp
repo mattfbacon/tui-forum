@@ -15,7 +15,8 @@ public:
 	using id_t = uint64_t;
 public:
 	User();
-	User(id_t id, sql::SQLString username, sql::SQLString password, sql::SQLString display_name);
+	// create a user
+	User(std::string username, std::string const& password, std::string display_name);
 	User(User const&) = delete;  // can't copy since id is unique
 	User(User&&) = default;
 	~User();
@@ -49,6 +50,8 @@ public:
 	static bool delete_by_id(id_t id);
 	static std::optional<id_t> id_from_param(std::string_view const param, ORM::User::id_t const self_id);
 protected:
+	User(id_t id, sql::SQLString username, sql::SQLString password, sql::SQLString display_name);
+protected:
 	// even though it should be, it can't be const due to msgpack weirdness
 	id_t m_id;
 	sql::SQLString m_username;
@@ -65,6 +68,7 @@ protected:
 	static std::string const SQL_UPDATE_DISPLAY_NAME;
 	static std::string const SQL_UPDATE_PASSWORD;
 	static std::string const SQL_DELETE_BY_ID;
+	static std::string const SQL_CREATE;
 public:
 	MSGPACK_DEFINE(m_id, m_username, m_display_name)
 };

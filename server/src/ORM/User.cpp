@@ -1,3 +1,4 @@
+#include <bcrypt/BCrypt.hpp>
 #include <mariadb/conncpp/PreparedStatement.hpp>
 #include <mariadb/conncpp/ResultSet.hpp>
 #include <memory>
@@ -9,6 +10,7 @@
 
 namespace ORM {
 
+std::string const User::SQL_CREATE = "insert into users (username, password, display_name) values (?, ?, ?)";
 std::string const User::SQL_FETCH_BY_ID = "select username, password, display_name from users where id = ?";
 std::string const User::SQL_FETCH_BY_USERNAME = "select id, password, display_name from users where username = ?";
 std::string const User::SQL_FETCH_BY_DISPLAY_NAME = "select id, username, password from users where display_name = ?";
@@ -19,6 +21,21 @@ std::string const User::SQL_DELETE_BY_ID = "delete from users where id = ?";
 
 User::User() {
 	// zero-initialize/default-construct all members
+}
+
+User::User(std::string username, std::string const& password, std::string display_name)
+	: m_username(std::move(username)), m_password(BCrypt::generateHash(password)), m_display_name(std::move(display_name)) {
+	std::unique_ptr<sql::ResultSet> results;
+	{
+		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_CREATE) };
+		stmt->setString(1, m_username);
+		stmt->setString(2, m_password);
+		stmt->setString(3, m_display_name);
+		results.reset(stmt->executeQuery());
+	}
+	assert(results->next());
+	m_id = results->getUInt64("id");
+	assert(!results->next());
 }
 
 User::User(id_t id, sql::SQLString username, sql::SQLString password, sql::SQLString display_name)
