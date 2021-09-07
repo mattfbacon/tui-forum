@@ -1,8 +1,10 @@
 #include <bcrypt/BCrypt.hpp>
+#include <mariadb/conncpp/Exception.hpp>
 #include <mariadb/conncpp/PreparedStatement.hpp>
 #include <mariadb/conncpp/ResultSet.hpp>
 #include <memory>
 
+#include "ORM/ConstraintException.hpp"
 #include "ORM/User.hpp"
 
 #include "threadlocal.hpp"
@@ -11,6 +13,7 @@
 namespace ORM {
 
 std::string const User::SQL_CREATE = "insert into users (username, password, display_name) values (?, ?, ?)";
+std::string const User::SQL_CREATE_GET_ID = "select id from users where username = ?";
 std::string const User::SQL_FETCH_BY_ID = "select username, password, display_name from users where id = ?";
 std::string const User::SQL_FETCH_BY_USERNAME = "select id, password, display_name from users where username = ?";
 std::string const User::SQL_FETCH_BY_DISPLAY_NAME = "select id, username, password from users where display_name = ?";
@@ -18,6 +21,9 @@ std::string const User::SQL_UPDATE_DISPLAY_NAME_PASSWORD = "update users set dis
 std::string const User::SQL_UPDATE_DISPLAY_NAME = "update users set display_name = ? where id = ?";
 std::string const User::SQL_UPDATE_PASSWORD = "update users set password = ? where id = ?";
 std::string const User::SQL_DELETE_BY_ID = "delete from users where id = ?";
+
+char const* const User::CLASS_NAME = "User";
+char const* const User::FIELD_NAME_USERNAME = "username";
 
 User::User() {
 	// zero-initialize/default-construct all members
@@ -31,6 +37,16 @@ User::User(std::string username, std::string const& password, std::string displa
 		stmt->setString(1, m_username);
 		stmt->setString(2, m_password);
 		stmt->setString(3, m_display_name);
+		try {
+			stmt->execute();
+		} catch (sql::SQLSyntaxErrorException const& e) {
+			// MariaDB throws this for unique constraint violation, so assume that's what happened...
+			throw ConstraintException{ CLASS_NAME, FIELD_NAME_USERNAME };
+		}
+	}
+	{
+		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_CREATE_GET_ID) };
+		stmt->setString(1, m_username);
 		results.reset(stmt->executeQuery());
 	}
 	assert(results->next());

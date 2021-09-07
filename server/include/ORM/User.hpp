@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mariadb/conncpp/SQLString.hpp>
 #include <msgpack.hpp>
 #include <msgpack/adaptor/int.hpp>
 #include <optional>
@@ -69,6 +70,10 @@ protected:
 	static std::string const SQL_UPDATE_PASSWORD;
 	static std::string const SQL_DELETE_BY_ID;
 	static std::string const SQL_CREATE;
+	static std::string const SQL_CREATE_GET_ID;
+protected:
+	static char const* const CLASS_NAME;
+	static char const* const FIELD_NAME_USERNAME;
 public:
 	MSGPACK_DEFINE(m_id, m_username, m_display_name)
 };
