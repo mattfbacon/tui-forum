@@ -4,9 +4,14 @@
 #include <string>
 #include <unordered_map>
 
+#include "Config.hpp"
+
 #include "util.hpp"
 
 namespace HTTP {
+using Request = uWS::HttpRequest;
+using Response = uWS::HttpResponse<WebConfig::USE_SSL>;
+
 namespace Status {
 using code_t = int;
 constexpr code_t const OK = 200;

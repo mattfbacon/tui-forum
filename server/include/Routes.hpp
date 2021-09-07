@@ -43,8 +43,8 @@ class HttpResponse;
 	}
 
 namespace Routes {
-using Request = uWS::HttpRequest;
-using Response = uWS::HttpResponse<WebConfig::USE_SSL>;
+using HTTP::Request;
+using HTTP::Response;
 using Route = void(Response* res, Request* req);
 #define REGISTERER(NAME) ROUTES_CUSTOM_REGISTERER_IMPL(NAME, )
 #define ROUTE(NAME) extern Route NAME __attribute__((nonnull(1, 2)));
