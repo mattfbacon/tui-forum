@@ -1,4 +1,5 @@
 #include "HTTP.hpp"
+#include "ORM/ConstraintException.hpp"
 #include "ORM/User.hpp"
 #include "Routes.hpp"
 
@@ -16,8 +17,28 @@ struct UserCreationData {
 };
 }  // namespace
 
-ROUTE_IMPL_BEGIN(post, res, req)
-// TODO
+ROUTE_IMPL_BEGIN(post, res, )
+read_from(res, [res](std::string_view msgpack_data) {
+	try {
+		// object handle must stay in scope while we work on the object
+		msgpack::object_handle oh = msgpack::unpack(msgpack_data.data(), msgpack_data.size());
+		msgpack::object obj = *oh;
+		UserCreationData data;
+		obj.convert(data);
+		// create user
+		ORM::User user{ data.username, data.password, data.display_name };
+		ResponseWrapper wrapper{ res };
+		msgpack::packer packer{ wrapper };
+		packer.pack(user);
+		res->end();
+	} catch (ORM::ConstraintException const& e) {
+		if (e.matches("User", "username")) {
+			res->writeStatus(HTTP_STATUS(HTTP::Status::UNPROCESSABLE_ENTITY));
+			res->write("Username taken");
+			res->end();
+		}
+	}
+});
 ROUTE_IMPL_END
 
 ROUTES_REGISTERER_IMPL(app) {

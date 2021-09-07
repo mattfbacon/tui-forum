@@ -40,34 +40,24 @@ auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0),
 auto user = HTTP::unwrap(ORM::User::get_by_id(user_id), HTTP::Status::NOT_FOUND);
 // TODO when auth is added: check that id is the user's id, otherwise send 403
 #warning "No auth!"
-std::string msgpack_data;
-res
-	->onAborted([res]() {
-		res->writeStatus(HTTP_STATUS(HTTP::Status::BAD_REQUEST));
-	})
-	->onData([res, msgpack_data = std::move(msgpack_data), user = std::move(user)](std::string_view const data, bool const last) mutable {
-		msgpack_data.append(data.data(), data.size());
-		if (last) {
-			HTTP_EXCEPT_WRAP_BEGIN
-			// object handle must stay in scope while we work on the object
-			msgpack::object_handle oh = msgpack::unpack(msgpack_data.data(), msgpack_data.size());
-			msgpack::object obj = *oh;
-			UserPatch patch;
-			obj.convert(patch);  // FIXME: does this throw??? no documentation...
-			if (patch.password.has_value()) {
-				user.set_password(str_to_sqlstr(BCrypt::generateHash(*patch.password)));
-			}
-			if (patch.display_name.has_value()) {
-				user.set_display_name(str_to_sqlstr(*patch.display_name));
-			}
-			user.save();
-			ResponseWrapper wrapper{ res };
-			msgpack::packer packer{ wrapper };
-			packer.pack(user);
-			res->end();
-			HTTP_EXCEPT_WRAP_END
-		}
-	});
+read_from(res, [res, &user](std::string_view const msgpack_data) mutable {
+	// object handle must stay in scope while we work on the object
+	msgpack::object_handle oh = msgpack::unpack(msgpack_data.data(), msgpack_data.size());
+	msgpack::object obj = *oh;
+	UserPatch patch;
+	obj.convert(patch);  // FIXME: does this throw??? no documentation...
+	if (patch.password.has_value()) {
+		user.set_password(str_to_sqlstr(BCrypt::generateHash(*patch.password)));
+	}
+	if (patch.display_name.has_value()) {
+		user.set_display_name(str_to_sqlstr(*patch.display_name));
+	}
+	user.save();
+	ResponseWrapper wrapper{ res };
+	msgpack::packer packer{ wrapper };
+	packer.pack(user);
+	res->end();
+});
 ROUTE_IMPL_END
 
 ROUTE_IMPL_BEGIN(param_delete, res, req)
