@@ -11,9 +11,9 @@ std::string const path = "/users";
 namespace {
 struct UserCreationData {
 	std::string username;
-	std::string display_name;
 	std::string password;
-	MSGPACK_DEFINE(username, display_name, password)
+	std::string display_name;
+	MSGPACK_DEFINE(username, password, display_name)
 };
 }  // namespace
 
