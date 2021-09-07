@@ -13,19 +13,20 @@ set(DIR_LIB lib CACHE PATH "Libraries Directory")
 
 # Sources
 set (sources
-	main.cpp
 	your_stdlib_is_garbage.cpp
 	Config.cpp
 	threadlocal.cpp
-	Routes/common.cpp
-	Routes/users.cpp
-	Routes/posts.cpp
-	Routes/users/id.cpp
-	Routes/users/username.cpp
 	Routes/users/display_name.cpp
 	Routes/users/session.cpp
+	Routes/users/username.cpp
+	Routes/users/id.cpp
+	Routes/common.cpp
+	Routes/posts.cpp
+	Routes/users.cpp
 	util.cpp
 	ORM/User.cpp
+	ORM/ConstraintException.cpp
+	main.cpp
 	)
 
 project(${PROJECT_NAME} VERSION 0.1 LANGUAGES C CXX)
