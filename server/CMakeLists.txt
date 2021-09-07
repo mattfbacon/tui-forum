@@ -27,6 +27,7 @@ set (sources
 	ORM/User.cpp
 	ORM/ConstraintException.cpp
 	main.cpp
+	HTTP.cpp
 	)
 
 project(${PROJECT_NAME} VERSION 0.1 LANGUAGES C CXX)

@@ -18,22 +18,22 @@ class HttpResponse;
 #define HTTP_EXCEPT_WRAP_END_MINIMAL \
 	} \
 	catch (HTTP::StatusException const& e) { \
-		return send_code_handler(*res, e.code); \
+		return HTTP::send_code_handler(*res, e.code); \
 	} \
 	catch (std::exception const& e) { \
 		CERR_EXCEPTION(e); \
-		return send_code_handler(*res, HTTP::Status::INTERNAL_SERVER_ERROR); \
+		return HTTP::send_code_handler(*res, HTTP::Status::INTERNAL_SERVER_ERROR); \
 	}
 #define HTTP_EXCEPT_WRAP_END \
 	} \
 	catch (msgpack::parse_error const&) { \
-		return send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
+		return HTTP::send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
 	} \
 	catch (msgpack::type_error const&) { \
-		return send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
+		return HTTP::send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
 	} \
 	catch (msgpack::unpack_error const&) { \
-		return send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
+		return HTTP::send_code_handler<HTTP::Status::BAD_REQUEST>(res); \
 		HTTP_EXCEPT_WRAP_END_MINIMAL
 #define ROUTE_IMPL_BEGIN(NAME, PARAM_RES, PARAM_REQ) \
 	ROUTE_IMPL_NOEXCEPT(NAME, PARAM_RES, PARAM_REQ) { \
@@ -107,12 +107,6 @@ ROUTE(param_patch);
 
 REGISTERER(all);
 }  // namespace posts
-
-void send_code_handler(Response& res, HTTP::Status::code_t const code);
-template <HTTP::Status::code_t code>
-ROUTE_IMPL_NOEXCEPT(send_code_handler, res, = nullptr) {
-	send_code_handler(*res, code);
-}
 
 REGISTERER(404_handler);
 REGISTERER(all);

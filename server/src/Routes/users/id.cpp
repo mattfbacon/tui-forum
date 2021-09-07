@@ -76,14 +76,14 @@ ROUTE_IMPL_BEGIN(param_delete, res, req)
 auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0), 0), HTTP::Status::NOT_FOUND);
 auto const deleted = ORM::User::delete_by_id(user_id);
 if (deleted) {
-	return send_code_handler(*res, HTTP::Status::NO_CONTENT);
+	return HTTP::send_code_handler(*res, HTTP::Status::NO_CONTENT);
 } else {
 	throw HTTP::StatusException{ HTTP::Status::NOT_FOUND };
 }
 ROUTE_IMPL_END
 
 ROUTES_REGISTERER_IMPL(app) {
-	return app.any(param_path, send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).get(param_path, param_get).patch(param_path, param_patch).del(param_path, param_delete);
+	return app.any(param_path, HTTP::send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).get(param_path, param_get).patch(param_path, param_patch).del(param_path, param_delete);
 }
 
 }  // namespace id

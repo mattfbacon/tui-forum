@@ -27,7 +27,7 @@ ROUTES_REGISTERER_IMPL(app) {
 		username::register_all(
 		id::register_all(
 		session::register_all(
-			app.any(path, send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).post(path, post)
+			app.any(path, HTTP::send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).post(path, post)
 		)
 		)
 		)
