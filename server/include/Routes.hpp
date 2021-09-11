@@ -13,7 +13,7 @@ class HttpResponse;
 
 #define ROUTES_CUSTOM_REGISTERER_IMPL(NAME, PARAM) uWS::App&& register_##NAME(uWS::App&& PARAM)
 #define ROUTES_REGISTERER_IMPL(PARAM) ROUTES_CUSTOM_REGISTERER_IMPL(all, PARAM)
-#define ROUTE_IMPL_NOEXCEPT(NAME, PARAM_RES, PARAM_REQ) __attribute__((nonnull(1))) void NAME(Response* const PARAM_RES, Request* const PARAM_REQ)
+#define ROUTE_IMPL_NOEXCEPT(NAME, PARAM_RES, PARAM_REQ) void NAME(Response* const PARAM_RES, Request* const PARAM_REQ)
 #define HTTP_EXCEPT_WRAP_BEGIN try {
 #define HTTP_EXCEPT_WRAP_END_MINIMAL \
 	} \

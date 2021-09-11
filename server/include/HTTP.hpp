@@ -45,7 +45,7 @@ T&& unwrap(std::optional<T>&& x_opt, HTTP::Status::code_t const status_code) {
 
 void send_code_handler(Response& res, HTTP::Status::code_t const code);
 template <HTTP::Status::code_t code>
-void send_code_handler(Response* const res, Request* const req = nullptr) __attribute__((nonnull(1))) {
+void __attribute__((nonnull(1))) send_code_handler(Response* const res, Request* const = nullptr) {
 	send_code_handler(*res, code);
 }
 
