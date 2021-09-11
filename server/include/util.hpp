@@ -28,6 +28,7 @@ inline bool is_digits(std::string_view const s) {
 
 std::string sqlstr_to_str(sql::SQLString const& str);
 sql::SQLString str_to_sqlstr(std::string const& str);
+sql::SQLString sv_to_sqlstr(std::string_view const sv);
 
 template <typename I>
 std::optional<I> sv_to_number(std::string_view const sv) {

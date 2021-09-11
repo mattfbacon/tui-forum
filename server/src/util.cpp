@@ -11,6 +11,9 @@ std::string sqlstr_to_str(sql::SQLString const& str) {
 sql::SQLString str_to_sqlstr(std::string const& str) {
 	return sql::SQLString{ str.data(), str.size() };
 }
+sql::SQLString sv_to_sqlstr(std::string_view const sv) {
+	return sql::SQLString{ sv.data(), sv.size() };
+}
 
 void write_sv_to_unpacker(msgpack::unpacker& unpacker, std::string_view const sv) {
 	unpacker.reserve_buffer(sv.size());
