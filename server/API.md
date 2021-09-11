@@ -95,7 +95,7 @@ DELETE /users/session : 204 (logged out, will contain cookie delete header) | 40
 ✓ +PATCH /users/id/:id UserEditData : 200 User | 404 | 422 UserEditFailureReason
 ✓ +DELETE /users/id/:id : 204 (user deleted) | 404
 
-POST /users UserCreationData : 201 User | 422 UserCreationFailureReason
+✓ POST /users UserCreationData : 201 User | 422 UserCreationFailureReason
 
 >> where name and displayname are strings
 GET /users/username/:name : 200 User | 404
