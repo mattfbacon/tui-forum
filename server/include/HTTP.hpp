@@ -15,6 +15,7 @@ using Response = uWS::HttpResponse<WebConfig::USE_SSL>;
 namespace Status {
 using code_t = int;
 constexpr code_t const OK = 200;
+constexpr code_t const CREATED = 201;
 constexpr code_t const NO_CONTENT = 204;
 constexpr code_t const BAD_REQUEST = 400;
 constexpr code_t const UNAUTHORIZED = 401;
