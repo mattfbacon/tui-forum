@@ -18,7 +18,7 @@ ROUTE_IMPL_NOEXCEPT(post, res, req) {
 }
 
 ROUTES_REGISTERER_IMPL(app) {
-	return app.any(path, send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).get(path, get).post(path, post);
+	return app.any(path, HTTP::send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>).get(path, get).post(path, post);
 }
 }  // namespace session
 }  // namespace users

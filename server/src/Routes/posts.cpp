@@ -33,8 +33,8 @@ ROUTE_IMPL_NOEXCEPT(param_patch, res, req) {
 }
 
 ROUTES_REGISTERER_IMPL(app) {
-	return app.any(path, send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>)
-		.any(param_path, send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>)
+	return app.any(path, HTTP::send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>)
+		.any(param_path, HTTP::send_code_handler<HTTP::Status::METHOD_NOT_ALLOWED>)
 		.get(path, get)
 		.get(param_path, param_get)
 		.post(path, post)
