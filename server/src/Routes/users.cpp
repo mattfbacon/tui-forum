@@ -28,7 +28,7 @@ read_from(res, [res](std::string_view msgpack_data) {
 		// create user
 		ORM::User user{ data.username, data.password, data.display_name };
 		res->writeStatus(HTTP_STATUS(HTTP::Status::CREATED));
-		ResponseWrapper wrapper{ res };
+		HTTP::ResponseWrapper wrapper{ res };
 		msgpack::packer packer{ wrapper };
 		packer.pack(user);
 		res->end();

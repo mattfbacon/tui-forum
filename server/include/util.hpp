@@ -9,6 +9,13 @@
 #include <string_view>
 #include <uWebSockets/App.h>
 
+namespace Strings {
+extern std::string const SELF;
+extern std::string const SQL_GET_ROW_COUNT;
+}  // namespace Strings
+
+namespace util {
+
 inline bool is_digit(char const c) {
 	return c >= '0' && c <= '9';
 }
@@ -18,11 +25,6 @@ inline bool is_digits(std::string const& s) {
 inline bool is_digits(std::string_view const s) {
 	return std::all_of(std::cbegin(s), std::cend(s), is_digit);
 }
-
-namespace Strings {
-extern std::string const SELF;
-extern std::string const SQL_GET_ROW_COUNT;
-}  // namespace Strings
 
 std::string sqlstr_to_str(sql::SQLString const& str);
 sql::SQLString str_to_sqlstr(std::string const& str);
@@ -40,6 +42,23 @@ std::optional<I> sv_to_number(std::string_view const sv) {
 }
 
 void write_sv_to_unpacker(msgpack::unpacker& unpacker, std::string_view const sv);
+
+template <typename T, typename E, typename... EArgs>
+T& unwrap(std::optional<T>& x_opt, EArgs... e_args) {
+	if (!x_opt.has_value()) {
+		throw E{ e_args... };
+	}
+	return *x_opt;
+}
+template <typename T, typename E, typename... EArgs>
+T&& unwrap(std::optional<T>&& x_opt, EArgs... e_args) {
+	if (!x_opt.has_value()) {
+		throw E{ e_args... };
+	}
+	return std::move(*x_opt);
+}
+
+}  // namespace util
 
 // TERMINATES!!
 #define TODO(STR) \
@@ -102,34 +121,6 @@ MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
 	}  // namespace adaptor
 }
 }  // namespace msgpack
-
-// this is necessary because uWS::HttpResponse does not have a write signature that is compatible with standard streams, instead taking a std::string_view. Hence, this wrapper simply constructs one from the data and size (exposing the proper signature), and passes it to the HttpResponse write function.
-template <bool SSL>
-class ResponseWrapper {
-public:
-	// non-owning pointer
-	ResponseWrapper(uWS::HttpResponse<SSL>* res) : res(res) {}
-	ResponseWrapper& write(char const* const data, size_t const size) {
-		res->write(std::string_view{ data, size });
-		return *this;
-	}
-	uWS::HttpResponse<SSL>* res;
-};
-
-template <typename T, typename E, typename... EArgs>
-T& unwrap(std::optional<T>& x_opt, EArgs... e_args) {
-	if (!x_opt.has_value()) {
-		throw E{ e_args... };
-	}
-	return *x_opt;
-}
-template <typename T, typename E, typename... EArgs>
-T&& unwrap(std::optional<T>&& x_opt, EArgs... e_args) {
-	if (!x_opt.has_value()) {
-		throw E{ e_args... };
-	}
-	return std::move(*x_opt);
-}
 
 // uses clog because it's buffered
 #define CERR_EXCEPTION(e) std::clog << __FILE__ << ':' << __LINE__ << ' ' << __PRETTY_FUNCTION__ << " exception: " << e.what() << std::endl

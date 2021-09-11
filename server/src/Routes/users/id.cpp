@@ -29,7 +29,7 @@ ROUTE_IMPL_BEGIN(param_get, res, req)
 // TODO: add self
 auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0), /* self here */ 0), HTTP::Status::NOT_FOUND);
 auto const user = HTTP::unwrap(ORM::User::get_by_id(user_id), HTTP::Status::NOT_FOUND);
-ResponseWrapper wrapper{ res };
+HTTP::ResponseWrapper wrapper{ res };
 msgpack::packer packer{ wrapper };
 packer.pack(user);
 res->end();
@@ -47,13 +47,13 @@ read_from(res, [res, &user](std::string_view const msgpack_data) mutable {
 	UserPatch patch;
 	obj.convert(patch);  // FIXME: does this throw??? no documentation...
 	if (patch.password.has_value()) {
-		user.set_password(str_to_sqlstr(BCrypt::generateHash(*patch.password)));
+		user.set_password(util::str_to_sqlstr(BCrypt::generateHash(*patch.password)));
 	}
 	if (patch.display_name.has_value()) {
-		user.set_display_name(str_to_sqlstr(*patch.display_name));
+		user.set_display_name(util::str_to_sqlstr(*patch.display_name));
 	}
 	user.save();
-	ResponseWrapper wrapper{ res };
+	HTTP::ResponseWrapper wrapper{ res };
 	msgpack::packer packer{ wrapper };
 	packer.pack(user);
 	res->end();
