@@ -110,4 +110,4 @@ target_include_directories(msgpack INTERFACE SYSTEM /usr/include/boost)
 
 include(${DIR_LIB}/bcrypt.cmake)
 
-target_link_libraries(${EXECUTABLE_NAME} PRIVATE uwebsockets mariadbcpp msgpack bcrypt)
+target_link_libraries(${EXECUTABLE_NAME} PRIVATE uwebsockets mariadbcpp msgpack bcrypt memcached)

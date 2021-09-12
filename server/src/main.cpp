@@ -1,4 +1,5 @@
 #include <iostream>
+#include <libmemcached/memcached.hpp>
 #include <mariadb/conncpp.hpp>
 #include <uWebSockets/App.h>
 
@@ -13,6 +14,12 @@ auto connect_to_db() {
 	std::lock_guard _lock{ db_config_mutex };
 	namespace C = MariaDBConfig;
 	return std::unique_ptr<sql::Connection>{ sql::DriverManager::getConnection("jdbc:mariadb://" + C::host + "/" + C::database, C::username, C::password) };
+}
+
+auto connect_to_memcached() {
+	namespace C = MemcachedConfig;
+	auto conn = std::make_unique<memcache::Memcache>(C::sock_path);
+	return conn;
 }
 
 class ThreadInfo {
@@ -53,6 +60,9 @@ void create_server(unsigned int const thread_id) {
 	ThreadLocal::tid = thread_id;
 	if (ThreadLocal::conn.get() == nullptr) {
 		ThreadLocal::conn = connect_to_db();
+	}
+	if (ThreadLocal::cache.get() == nullptr) {
+		ThreadLocal::cache = connect_to_memcached();
 	}
 	Routes::register_all(uWS::App{}).listen(WebConfig::PORT, listen_callback).run();
 }

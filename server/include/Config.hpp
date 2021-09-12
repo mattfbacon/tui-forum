@@ -13,3 +13,7 @@ namespace WebConfig {
 static constexpr int const PORT = 9000;
 static constexpr bool const USE_SSL = false;
 }  // namespace WebConfig
+
+namespace MemcachedConfig {
+extern std::string const sock_path;
+}
