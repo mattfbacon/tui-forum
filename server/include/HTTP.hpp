@@ -63,6 +63,44 @@ void __attribute__((nonnull(1))) send_code_handler(Response* const res, Request*
 	send_code_handler(*res, code);
 }
 
+template <typename T>
+concept IStringPiecewise = requires(T v, size_t reserve_size, char append_char) {
+	v.reserve(reserve_size);
+	v.append(append_char);
+};
+
+template <typename StringType>
+std::optional<StringType> decode_uri(std::string_view const encoded) requires IStringPiecewise<StringType> {
+	StringType out_data;
+	size_t const in_data_size = encoded.size();
+	out_data.reserve(in_data_size);  // max length
+	for (size_t i = 0; i < in_data_size; i++) {
+		if (char const current_char = encoded[i]; current_char == '%') {
+			if (i + 2 >= in_data_size) {
+				return {};
+			}
+
+			int hex1 = (int)encoded[i + 1] - '0';
+			if (hex1 > 9) {
+				hex1 &= 223;
+				hex1 -= 7;
+			}
+
+			int hex2 = (int)encoded[i + 2] - '0';
+			if (hex2 > 9) {
+				hex2 &= 223;
+				hex2 -= 7;
+			}
+
+			out_data.append((unsigned char)(hex1 * 16 + hex2));
+			i += 2;
+		} else {
+			out_data.append(current_char);
+		}
+	}
+	return out_data;
+}
+
 }  // namespace HTTP
 
 #define HTTP_STATUS(VAL) HTTP::Status::strings.at(VAL)
