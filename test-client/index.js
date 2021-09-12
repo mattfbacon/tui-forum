@@ -31,8 +31,8 @@ const repl = () => {
 	for await (cmd of repl()) {
 		const split = cmd.split(' ');
 		const method = split[0].toUpperCase();
-		const url = split[1];
-		const content = eval(cmd.slice(method.length + 1 + url.length + 1));
+		const url = decodeURIComponent(split[1]);
+		const content = eval(cmd.slice(method.length + 1 + split[1].length + 1));
 		const fetch_response = await fetch('http://localhost:9000' + url, { method, ...(method == 'GET' || method == 'HEAD' ? {} : { body: encode(content) }) });
 		if (fetch_response.status >= 200 && fetch_response.status < 300 && fetch_response.status !== 204) {
 			const decoded = decode(await fetch_response.arrayBuffer());
