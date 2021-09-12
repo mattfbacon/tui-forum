@@ -56,7 +56,7 @@ User::User(std::string username, std::string const& password, std::string displa
 
 User::User(id_t id, sql::SQLString username, sql::SQLString password, sql::SQLString display_name)
 	: m_id(std::move(id)), m_username(std::move(username)), m_password(std::move(password)), m_display_name(std::move(display_name)) {
-	assert(m_password.size() == 64);
+	assert(m_password.size() == PASSWORD_HASH_LENGTH);
 }
 
 User::~User() {

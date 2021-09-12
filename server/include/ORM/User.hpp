@@ -14,6 +14,7 @@ namespace ORM {
 class User final {
 public:
 	using id_t = uint64_t;
+	static size_t constexpr PASSWORD_HASH_LENGTH = 60;
 public:
 	User();
 	// create a user
@@ -31,7 +32,7 @@ public:
 		return m_password;
 	}
 	inline void set_password(sql::SQLString value) {
-		assert(value.size() == 64);
+		assert(value.size() == PASSWORD_HASH_LENGTH);
 		m_password = std::move(value);
 		password_dirty = true;
 	}
