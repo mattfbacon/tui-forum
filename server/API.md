@@ -108,7 +108,7 @@ DELETE /users/session : 204 (logged out, will contain cookie delete header) | 40
 
 >> where name and display_name are strings
 ✓xx GET /users/username/:name : 200 User | 404
-GET /users/display_name/:display_name : 200 User[] (which will be empty if there are no users with that display name)
+✓xx GET /users/display_name/:display_name : 200 User[] (which will be empty if there are no users with that display name)
 
 GET /posts PostSearchParameters : 200 Post[] | 422 PostSearchFailureReason
 >> where id is a number
