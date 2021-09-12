@@ -4,8 +4,6 @@
 
 ```ts
 interface SessionData {
-	// core data
-	token: SessionToken; // TODO: haven't decided on the type yet
 	id: UserKey;
 }
 interface SessionPostData {
