@@ -81,7 +81,18 @@ For a GET request with query parameters, all of the parameters are optional by d
 
 A plus before the method means authentication is required; the request can fail with either 401 (not logged in) or 403 (logged in but without proper permission)
 
-A check means that the route has been implemented at a basic level (may be lacking authorization, etc). Two checks means that a route is fully implemented.
+### Indication of Completion
+
+There is a three-check system:
+1. Implemented on a basic level
+2. Has authorization (including `self` as ID)
+3. Verifies its operands
+
+In terms of implementation priority, I will start with the first check, then work on the second, then the third.
+
+Even if an item doesn't have authorization/verification, I will put an `x`, and check it at its time. The reason for this is that it might turn out that it does need that, and I don't want to ignore it.
+
+A lack of any `✓`s or `x`s implies three `x`s.
 
 ```
 GET /users/session : 200 SessionData | 404 (not logged in)
@@ -89,11 +100,11 @@ POST /users/session SessionPostData : 201 SessionData (new session from logged-o
 DELETE /users/session : 204 (logged out, will contain cookie delete header) | 404 (not logged in)
 
 >> where id is a natural number or "self" for the current user (using self adds 401 to the responses):
-✓ GET /users/id/:id : 200 User | 404
-✓ +PATCH /users/id/:id UserEditData : 200 User | 404 | 422 UserEditFailureReason
-✓ +DELETE /users/id/:id : 204 (user deleted) | 404
+✓xx GET /users/id/:id : 200 User | 404
+✓xx +PATCH /users/id/:id UserEditData : 200 User | 404 | 422 UserEditFailureReason
+✓xx +DELETE /users/id/:id : 204 (user deleted) | 404
 
-✓ POST /users UserCreationData : 201 User | 422 UserCreationFailureReason
+✓xx POST /users UserCreationData : 201 User | 422 UserCreationFailureReason
 
 >> where name and displayname are strings
 GET /users/username/:name : 200 User | 404
