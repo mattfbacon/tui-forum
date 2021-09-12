@@ -8,17 +8,51 @@
 
 #include "threadlocal.hpp"
 
+struct ConnectionError : public std::exception {
+	enum class Service {
+		mariadb,
+		memcached,
+	};
+	Service service;
+	ConnectionError(Service const service) : service(service) {}
+	char const* what() const noexcept override {
+		return "ConnectionError";
+	}
+	char const* service_name() const noexcept {
+		switch (service) {
+			case Service::mariadb:
+				return "MariaDB";
+			case Service::memcached:
+				return "Memcached";
+			default:
+				__builtin_unreachable();
+		}
+	}
+};
+
 auto connect_to_db() {
 	// because accessing a constant SQLString is apparently not thread-safe...
 	static std::mutex db_config_mutex;
 	std::lock_guard _lock{ db_config_mutex };
 	namespace C = MariaDBConfig;
-	return std::unique_ptr<sql::Connection>{ sql::DriverManager::getConnection("jdbc:mariadb://" + C::host + "/" + C::database, C::username, C::password) };
+	try {
+		return std::unique_ptr<sql::Connection>{ sql::DriverManager::getConnection("jdbc:mariadb://" + C::host + "/" + C::database, C::username, C::password) };
+	} catch (sql::SQLSyntaxErrorException const& e) {
+		// 11 = can't connect
+		if (const_cast<sql::SQLSyntaxErrorException&>(e).getErrorCode() == 11) {
+			throw ConnectionError{ ConnectionError::Service::mariadb };
+		} else {
+			throw;
+		}
+	}
 }
 
 auto connect_to_memcached() {
 	namespace C = MemcachedConfig;
 	auto conn = std::make_unique<memcache::Memcache>(C::sock_path);
+	if (conn->error()) {
+		throw ConnectionError{ ConnectionError::Service::memcached };
+	}
 	return conn;
 }
 
@@ -58,11 +92,19 @@ void listen_callback(us_listen_socket_t* const) {
 
 void create_server(unsigned int const thread_id) {
 	ThreadLocal::tid = thread_id;
-	if (ThreadLocal::conn.get() == nullptr) {
-		ThreadLocal::conn = connect_to_db();
-	}
-	if (ThreadLocal::cache.get() == nullptr) {
-		ThreadLocal::cache = connect_to_memcached();
+	try {
+		if (ThreadLocal::conn.get() == nullptr) {
+			ThreadLocal::conn = connect_to_db();
+		}
+		if (ThreadLocal::cache.get() == nullptr) {
+			ThreadLocal::cache = connect_to_memcached();
+		}
+	} catch (ConnectionError const& e) {
+		if (isatty(fileno(stderr))) {
+			std::clog << "\x1b[0G";
+		}
+		std::clog << "Could not connect to " << e.service_name() << "is the service running? " << std::endl;
+		_exit(EXIT_FAILURE);
 	}
 	Routes::register_all(uWS::App{}).listen(WebConfig::PORT, listen_callback).run();
 }
