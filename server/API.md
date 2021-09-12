@@ -107,7 +107,7 @@ DELETE /users/session : 204 (logged out, will contain cookie delete header) | 40
 ✓xx POST /users UserCreationData : 201 User | 422 UserCreationFailureReason
 
 >> where name and display_name are strings
-GET /users/username/:name : 200 User | 404
+✓xx GET /users/username/:name : 200 User | 404
 GET /users/display_name/:display_name : 200 User[] (which will be empty if there are no users with that display name)
 
 GET /posts PostSearchParameters : 200 Post[] | 422 PostSearchFailureReason
