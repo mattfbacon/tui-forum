@@ -33,7 +33,13 @@ const repl = () => {
 		const method = split[0].toUpperCase();
 		const url = decodeURIComponent(split[1]);
 		const content = eval(cmd.slice(method.length + 1 + split[1].length + 1));
-		const fetch_response = await fetch('http://localhost:9000' + url, { method, ...(method == 'GET' || method == 'HEAD' ? {} : { body: encode(content) }) });
+		let fetch_response;
+		try {
+			fetch_response = await fetch('http://localhost:9000' + url, { method, ...(method == 'GET' || method == 'HEAD' ? {} : { body: encode(content) }) });
+		} catch (e) {
+			console.error(e.toString());
+			continue;
+		}
 		if (fetch_response.status >= 200 && fetch_response.status < 300 && fetch_response.status !== 204) {
 			const decoded = decode(await fetch_response.arrayBuffer());
 			console.info(decoded);
