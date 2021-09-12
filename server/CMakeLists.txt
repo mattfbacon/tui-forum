@@ -64,7 +64,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
 	-fno-omit-frame-pointer -fstack-protector-strong \
-	-Og -ggdb3 -Werror -Wfatal-errors -Wno-error=cpp -Wno-error=pedantic \
+	-O0 -ggdb3 -Werror -Wfatal-errors -Wno-error=cpp -Wno-error=pedantic \
 	")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
