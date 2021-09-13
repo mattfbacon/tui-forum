@@ -69,6 +69,7 @@ concept IStringPiecewise = requires(T v, size_t reserve_size, char append_char) 
 	v.append(append_char);
 };
 
+// this code is from inside uWebSockets: https://github.com/uNetworking/uWebSockets/blob/5f0065825a869fd31f5cf52a51b218f4402bf380/src/QueryParser.h#L62
 template <typename StringType>
 std::optional<StringType> decode_uri(std::string_view const encoded) requires IStringPiecewise<StringType> {
 	StringType out_data;
