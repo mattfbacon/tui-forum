@@ -1,6 +1,6 @@
 #include <iostream>
 #include <libmemcached/memcached.hpp>
-#include <mariadb/conncpp.hpp>
+#include <tao/pq/connection.hpp>
 #include <uWebSockets/App.h>
 
 #include "Config.hpp"
@@ -10,7 +10,7 @@
 
 struct ConnectionError : public std::exception {
 	enum class Service {
-		mariadb,
+		postgresql,
 		memcached,
 	};
 	Service service;
@@ -20,8 +20,8 @@ struct ConnectionError : public std::exception {
 	}
 	char const* service_name() const noexcept {
 		switch (service) {
-			case Service::mariadb:
-				return "MariaDB";
+			case Service::postgresql:
+				return "PostgreSQL";
 			case Service::memcached:
 				return "Memcached";
 			default:
@@ -31,19 +31,12 @@ struct ConnectionError : public std::exception {
 };
 
 auto connect_to_db() {
-	// because accessing a constant SQLString is apparently not thread-safe...
-	static std::mutex db_config_mutex;
-	std::lock_guard _lock{ db_config_mutex };
-	namespace C = MariaDBConfig;
+	namespace C = SqlConfig;
 	try {
-		return std::unique_ptr<sql::Connection>{ sql::DriverManager::getConnection("jdbc:mariadb://" + C::host + "/" + C::database, C::username, C::password) };
-	} catch (sql::SQLSyntaxErrorException const& e) {
-		// 11 = can't connect
-		if (const_cast<sql::SQLSyntaxErrorException&>(e).getErrorCode() == 11) {
-			throw ConnectionError{ ConnectionError::Service::mariadb };
-		} else {
-			throw;
-		}
+		auto const conn = tao::pq::connection::create(std::string{ "host=" } + C::host + " dbname=" + C::database + " user=" + C::username + " password=" + C::password);
+		return conn;
+	} catch (std::runtime_error const& e) {
+		throw ConnectionError{ ConnectionError::Service::postgresql };
 	}
 }
 
@@ -103,7 +96,7 @@ void create_server(unsigned int const thread_id) {
 		if (isatty(fileno(stderr))) {
 			std::clog << "\x1b[0G";
 		}
-		std::clog << "Could not connect to " << e.service_name() << "is the service running? " << std::endl;
+		std::clog << "Could not connect to " << e.service_name() << "; is the service running? " << std::endl;
 		_exit(EXIT_FAILURE);
 	}
 	Routes::register_all(uWS::App{}).listen(WebConfig::PORT, listen_callback).run();

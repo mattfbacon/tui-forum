@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mariadb/conncpp.hpp>
+#include <string>
 
-namespace MariaDBConfig {
-extern sql::SQLString const host;
-extern sql::SQLString const database;
-extern sql::SQLString const username;
-extern sql::SQLString const password;
-}  // namespace MariaDBConfig
+namespace SqlConfig {
+extern std::string const host;
+extern std::string const database;
+extern std::string const username;
+extern std::string const password;
+}  // namespace SqlConfig
 
 namespace WebConfig {
 static constexpr int const PORT = 9000;

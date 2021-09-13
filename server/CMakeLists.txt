@@ -99,15 +99,11 @@ set_property(TARGET ${EXECUTABLE_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${${PR
 add_library(uwebsockets INTERFACE)
 target_link_libraries(uwebsockets INTERFACE usockets deflate ssl crypto z)
 
-# some distros put libmariadbcpp.so in /usr/lib/mariadb
-if (EXISTS /usr/lib/mariadb)
-	target_link_directories(${EXECUTABLE_NAME} PRIVATE /usr/lib/mariadb)
-endif()
-
 add_library(msgpack INTERFACE)
 target_include_directories(msgpack INTERFACE SYSTEM /usr/include/boost)
 # target_include_directories(msgpack INTERFACE /usr/include/msgpack)
 
 include(${DIR_LIB}/bcrypt.cmake)
+include(${DIR_LIB}/taopq.cmake)
 
-target_link_libraries(${EXECUTABLE_NAME} PRIVATE uwebsockets mariadbcpp msgpack bcrypt memcached)
+target_link_libraries(${EXECUTABLE_NAME} PRIVATE uwebsockets taopq msgpack bcrypt memcached)

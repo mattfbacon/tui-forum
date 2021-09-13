@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 #include "Config.hpp"
@@ -66,7 +67,7 @@ void __attribute__((nonnull(1))) send_code_handler(Response* const res, Request*
 template <typename T>
 concept IStringPiecewise = requires(T v, size_t reserve_size, char append_char) {
 	v.reserve(reserve_size);
-	v.append(append_char);
+	v += append_char;
 };
 
 template <typename StringType>
@@ -77,7 +78,7 @@ std::optional<StringType> decode_uri(std::string_view const encoded) requires IS
 	for (size_t i = 0; i < in_data_size; i++) {
 		if (char const current_char = encoded[i]; current_char == '%') {
 			if (i + 2 >= in_data_size) {
-				return {};
+				return std::nullopt;
 			}
 
 			int hex1 = (int)encoded[i + 1] - '0';
@@ -92,13 +93,13 @@ std::optional<StringType> decode_uri(std::string_view const encoded) requires IS
 				hex2 -= 7;
 			}
 
-			out_data.append((unsigned char)(hex1 * 16 + hex2));
+			out_data += (unsigned char)(hex1 * 16 + hex2);
 			i += 2;
 		} else {
-			out_data.append(current_char);
+			out_data += current_char;
 		}
 	}
-	return out_data;
+	return { out_data };
 }
 
 }  // namespace HTTP

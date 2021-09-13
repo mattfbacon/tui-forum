@@ -8,8 +8,8 @@ namespace display_name {
 std::string const param_path = "/users/display_name/:display_name";
 
 ROUTE_IMPL_BEGIN(param_get, res, req)
-auto const param_display_name_ = HTTP::decode_uri<sql::SQLString>(req->getParameter(0));
-auto const param_display_name = HTTP::unwrap<sql::SQLString const>(std::move(param_display_name_), HTTP::Status::BAD_REQUEST);
+auto const param_display_name_ = HTTP::decode_uri<std::string>(req->getParameter(0));
+auto const param_display_name = HTTP::unwrap<std::string const>(std::move(param_display_name_), HTTP::Status::BAD_REQUEST);
 
 auto const users = ORM::User::get_by_display_name(param_display_name);
 res->writeStatus(HTTP_STATUS(HTTP::Status::OK));
