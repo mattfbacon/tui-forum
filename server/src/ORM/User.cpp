@@ -1,8 +1,6 @@
 #include <bcrypt/BCrypt.hpp>
-#include <mariadb/conncpp/Exception.hpp>
-#include <mariadb/conncpp/PreparedStatement.hpp>
-#include <mariadb/conncpp/ResultSet.hpp>
 #include <memory>
+#include <tao/pq/connection.hpp>
 
 #include "ORM/ConstraintException.hpp"
 #include "ORM/User.hpp"
@@ -12,15 +10,15 @@
 
 namespace ORM {
 
-std::string const User::SQL_CREATE = "insert into users (username, password, display_name) values (?, ?, ?)";
-std::string const User::SQL_CREATE_GET_ID = "select id from users where username = ?";
-std::string const User::SQL_FETCH_BY_ID = "select username, password, display_name from users where id = ?";
-std::string const User::SQL_FETCH_BY_USERNAME = "select id, password, display_name from users where username = ?";
-std::string const User::SQL_FETCH_BY_DISPLAY_NAME = "select id, username, password from users where display_name = ?";
-std::string const User::SQL_UPDATE_DISPLAY_NAME_PASSWORD = "update users set display_name = ?, password = ? where id = ?";
-std::string const User::SQL_UPDATE_DISPLAY_NAME = "update users set display_name = ? where id = ?";
-std::string const User::SQL_UPDATE_PASSWORD = "update users set password = ? where id = ?";
-std::string const User::SQL_DELETE_BY_ID = "delete from users where id = ?";
+std::string const User::SQL_CREATE = "insert into users (username, password, display_name) values ($1, $2, $3)";
+std::string const User::SQL_CREATE_GET_ID = "select id from users where username = $1";
+std::string const User::SQL_FETCH_BY_ID = "select username, password, display_name from users where id = $1";
+std::string const User::SQL_FETCH_BY_USERNAME = "select id, password, display_name from users where username = $1";
+std::string const User::SQL_FETCH_BY_DISPLAY_NAME = "select id, username, password from users where display_name = $1";
+std::string const User::SQL_UPDATE_DISPLAY_NAME_PASSWORD = "update users set display_name = $1, password = $2 where id = $3";
+std::string const User::SQL_UPDATE_DISPLAY_NAME = "update users set display_name = $1 where id = $2";
+std::string const User::SQL_UPDATE_PASSWORD = "update users set password = $1 where id = $1";
+std::string const User::SQL_DELETE_BY_ID = "delete from users where id = $1";
 
 char const* const User::CLASS_NAME = "User";
 char const* const User::FIELD_NAME_USERNAME = "username";
@@ -31,30 +29,13 @@ User::User() {
 
 User::User(std::string username, std::string const& password, std::string display_name)
 	: m_username(std::move(username)), m_password(BCrypt::generateHash(password)), m_display_name(std::move(display_name)) {
-	std::unique_ptr<sql::ResultSet> results;
-	{
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_CREATE) };
-		stmt->setString(1, m_username);
-		stmt->setString(2, m_password);
-		stmt->setString(3, m_display_name);
-		try {
-			stmt->execute();
-		} catch (sql::SQLSyntaxErrorException const& e) {
-			// MariaDB throws this for unique constraint violation, so assume that's what happened...
-			throw ConstraintException{ CLASS_NAME, FIELD_NAME_USERNAME };
-		}
-	}
-	{
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_CREATE_GET_ID) };
-		stmt->setString(1, m_username);
-		results.reset(stmt->executeQuery());
-	}
-	assert(results->next());
-	m_id = results->getUInt64("id");
-	assert(!results->next());
+	ThreadLocal::conn->execute(SQL_CREATE, m_username, m_password, m_display_name);
+	auto const result = ThreadLocal::conn->execute(SQL_CREATE_GET_ID, m_username);
+	assert(result.size() == 1);
+	m_id = result[0][0].as<decltype(m_id)>();
 }
 
-User::User(id_t id, sql::SQLString username, sql::SQLString password, sql::SQLString display_name)
+User::User(id_t id, std::string username, std::string password, std::string display_name)
 	: m_id(std::move(id)), m_username(std::move(username)), m_password(std::move(password)), m_display_name(std::move(display_name)) {
 	assert(m_password.size() == PASSWORD_HASH_LENGTH);
 }
@@ -65,96 +46,57 @@ User::~User() {
 
 void User::save() {
 	if (password_dirty && display_name_dirty) {
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_UPDATE_DISPLAY_NAME_PASSWORD) };
-		stmt->setString(1, m_display_name);
-		stmt->setString(2, m_password);
-		stmt->setUInt64(3, m_id);
-		stmt->executeQuery();
+		ThreadLocal::conn->execute(SQL_UPDATE_DISPLAY_NAME_PASSWORD, m_display_name, m_password, m_id);
 	} else if (password_dirty && !display_name_dirty) {
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_UPDATE_PASSWORD) };
-		stmt->setString(1, m_password);
-		stmt->setUInt64(2, m_id);
-		stmt->executeQuery();
+		ThreadLocal::conn->execute(SQL_UPDATE_PASSWORD, m_password, m_id);
 	} else if (display_name_dirty && !password_dirty) {
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_UPDATE_DISPLAY_NAME) };
-		stmt->setString(1, m_display_name);
-		stmt->setUInt64(2, m_id);
-		stmt->executeQuery();
+		ThreadLocal::conn->execute(SQL_UPDATE_DISPLAY_NAME, m_display_name, m_id);
 	}
 }
 
 std::optional<User> User::get_by_id(id_t const id) {
-	std::unique_ptr<sql::ResultSet> results;
-	{
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_FETCH_BY_ID) };
-		stmt->setInt(1, id);
-		results.reset(stmt->executeQuery());
-	}
-	if (results->next()) {
+	auto const results = ThreadLocal::conn->execute(SQL_FETCH_BY_ID, id);
+	assert(results.size() <= 1);  // 0 or 1 entries
+	if (results.size() == 1) {
+		auto const& result = results[0];
 		return User{
 			id,
-			results->getString("username"),
-			results->getString("password"),
-			results->getString("display_name"),
+			result["username"].as<std::string>(),
+			result["password"].as<std::string>(),
+			result["display_name"].as<std::string>(),
 		};
 	} else {
 		return std::nullopt;
 	}
 }
-std::optional<User> User::get_by_name(sql::SQLString const& username) {
-	std::unique_ptr<sql::ResultSet> results;
-	{
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_FETCH_BY_USERNAME) };
-		stmt->setString(1, username);
-		results.reset(stmt->executeQuery());
-	}
-	if (results->next()) {
+std::optional<User> User::get_by_name(std::string_view const username) {
+	auto const results = ThreadLocal::conn->execute(SQL_FETCH_BY_USERNAME, username);
+	assert(results.size() <= 1);  // 0 or 1 entries
+	if (results.size() == 1) {
+		auto const& result = results[0];
 		return User{
-			results->getUInt64("id"),
-			username,
-			results->getString("password"),
-			results->getString("display_name"),
+			result["id"].as<id_t>(),
+			std::string{ username },
+			result["password"].as<std::string>(),
+			result["display_name"].as<std::string>(),
 		};
 	} else {
 		return std::nullopt;
 	}
 }
-std::vector<User> User::get_by_display_name(sql::SQLString const& display_name) {
-	std::unique_ptr<sql::ResultSet> results;
-	{
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_FETCH_BY_DISPLAY_NAME) };
-		stmt->setString(1, display_name);
-		results.reset(stmt->executeQuery());
-	}
-	std::vector<User> ret;
-	ret.reserve(results->rowsCount());
-	while (results->next()) {
-		// FIXME: figure out why emplace_back doesn't work
-		ret.push_back(User{ results->getUInt64("id"), results->getString("username"), results->getString("password"), display_name });
+std::vector<User, PrivateAllocator<User>> User::get_by_display_name(std::string_view const display_name) {
+	auto const results = ThreadLocal::conn->execute(SQL_FETCH_BY_DISPLAY_NAME, display_name);
+	std::vector<User, PrivateAllocator<User>> ret;
+	ret.reserve(results.size());
+	for (auto const& row : results) {
+		ret.emplace_back(row["id"].as<id_t>(), row["username"].as<std::string>(), row["password"].as<std::string>(), std::string{ display_name });
 	}
 	return ret;
 }
 bool User::delete_by_id(id_t const id) {
-	std::unique_ptr<sql::ResultSet> results;
-	{
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(SQL_DELETE_BY_ID) };
-		stmt->setUInt64(1, id);
-		stmt->execute();
-	}
-	{
-		std::unique_ptr<sql::PreparedStatement> stmt{ ThreadLocal::conn->prepareStatement(Strings::SQL_GET_ROW_COUNT) };
-		results.reset(stmt->executeQuery());
-	}
-	bool const has_at_least_one_row = results->next();
-	assert(has_at_least_one_row);
-	// row_count() returns unsigned long long, but there is no appropriate accessor function, so use uint64_t
-	auto const deleted_rows = results->getUInt64(1);
-	// effectively asserts that id is unique
-	assert(deleted_rows == 0 || deleted_rows == 1);
-	// assert that the row_count result doesn't have more than one row (will be a no-op in release mode)
-	assert(!results->next());
-	// effectively returns whether the row was found and and deleted
-	return deleted_rows == 1;
+	auto const results = ThreadLocal::conn->execute(SQL_DELETE_BY_ID, id);
+	assert(results.has_rows_affected());
+	return results.rows_affected() == 1;
 }
 
 std::optional<User::id_t> User::id_from_param(std::string_view const param, User::id_t const self_id) {

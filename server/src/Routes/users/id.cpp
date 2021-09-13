@@ -47,10 +47,10 @@ read_from(res, [res, &user](std::string_view const msgpack_data) mutable {
 	UserPatch patch;
 	obj.convert(patch);  // FIXME: does this throw??? no documentation...
 	if (patch.password.has_value()) {
-		user.set_password(util::str_to_sqlstr(BCrypt::generateHash(*patch.password)));
+		user.set_password(BCrypt::generateHash(*patch.password));
 	}
 	if (patch.display_name.has_value()) {
-		user.set_display_name(util::str_to_sqlstr(*patch.display_name));
+		user.set_display_name(*patch.display_name);
 	}
 	user.save();
 	HTTP::ResponseWrapper wrapper{ res };
