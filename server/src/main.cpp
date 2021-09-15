@@ -54,6 +54,8 @@ class ThreadInfo {
 	std::mutex info_mutex;
 	unsigned int goal_num;
 	unsigned int num_online;
+	std::mutex error_mutex;
+	bool error_flag = false;
 public:
 	ThreadInfo() {
 		goal_num = std::thread::hardware_concurrency();
@@ -77,6 +79,23 @@ public:
 		}
 		std::clog << std::flush;
 	}
+	void had_error(ConnectionError const& e) {
+		std::lock_guard _lock{ error_mutex };
+		if (error_flag) {
+			// don't spam errors
+			return;
+		}
+		error_flag = true;
+		if (isatty(fileno(stderr))) {
+			std::clog << "\x1b[0G";
+		}
+		std::clog << "Could not connect to " << e.service_name() << "; is the service running?\n";
+		std::clog << "Error message: " << e.why << std::endl;
+	}
+	bool did_any_have_error() {
+		std::lock_guard _lock{ error_mutex };
+		return error_flag;
+	}
 };  // namespace thread_info
 ThreadInfo thread_info;
 
@@ -85,7 +104,6 @@ void listen_callback(us_listen_socket_t* const) {
 }
 
 void create_server(unsigned int const thread_id) {
-	static std::mutex error_mutex;
 	ThreadLocal::tid = thread_id;
 	try {
 		if (ThreadLocal::conn.get() == nullptr) {
@@ -95,15 +113,11 @@ void create_server(unsigned int const thread_id) {
 			ThreadLocal::cache = connect_to_memcached();
 		}
 	} catch (ConnectionError const& e) {
-		std::lock_guard _lock{ error_mutex };
-		if (isatty(fileno(stderr))) {
-			std::clog << "\x1b[0G";
-		}
-		std::clog << "Could not connect to " << e.service_name() << "; is the service running?\n";
-		std::clog << "Error message: " << e.why << std::endl;
-		_exit(EXIT_FAILURE);
+		thread_info.had_error(e);
 	}
-	Routes::register_all(uWS::App{}).listen(WebConfig::PORT, listen_callback).run();
+	if (!thread_info.did_any_have_error()) {
+		Routes::register_all(uWS::App{}).listen(WebConfig::PORT, listen_callback).run();
+	}
 }
 
 int main() {
