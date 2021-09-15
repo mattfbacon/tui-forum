@@ -4,6 +4,7 @@
 #include <msgpack/adaptor/int.hpp>
 #include <optional>
 #include <string>
+#include <tao/pq/binary.hpp>
 #include <vector>
 
 #include "PrivateAllocator.hpp"
@@ -24,21 +25,20 @@ public:
 	User(User const&) = delete;  // can't copy since id is unique
 	User(User&&) = default;
 	~User();
-	inline id_t id() const {
+	inline auto id() const {
 		return m_id;
 	}
-	inline std::string const& username() const {
+	inline auto const& username() const {
 		return m_username;
 	}
-	inline std::string const& password() const {
+	inline auto const& password() const {
 		return m_password;
 	}
-	inline void set_password(std::string value) {
-		assert(value.size() == PASSWORD_HASH_LENGTH);
-		m_password = std::move(value);
+	inline void set_password(std::string const& value) {
+		m_password = hash_password(value);
 		password_dirty = true;
 	}
-	inline std::string const& display_name() const {
+	inline auto const& display_name() const {
 		return m_display_name;
 	}
 	inline void set_display_name(std::string value) {
@@ -53,13 +53,17 @@ public:
 	static std::vector<User, PrivateAllocator<User>> get_by_display_name(std::string_view const display_name);
 	static bool delete_by_id(id_t id);
 	static std::optional<id_t> id_from_param(std::string_view const param, ORM::User::id_t const self_id);
+	static tao::pq::binary hash_password(std::string const& plain);
 protected:
-	User(id_t id, std::string username, std::string password, std::string display_name);
+	User(id_t id, std::string username, tao::pq::binary password, std::string display_name)
+		: m_id(std::move(id)), m_username(std::move(username)), m_password(std::move(password)), m_display_name(std::move(display_name)) {
+		assert(m_password.size() == PASSWORD_HASH_LENGTH);
+	}
 protected:
 	// even though it should be, it can't be const due to msgpack weirdness
 	id_t m_id;
 	std::string m_username;
-	std::string m_password;
+	tao::pq::binary m_password;
 	std::string m_display_name;
 	bool password_dirty = false;
 	bool display_name_dirty = false;

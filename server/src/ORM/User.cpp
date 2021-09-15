@@ -23,21 +23,29 @@ std::string const User::SQL_DELETE_BY_ID = "delete from users where id = $1";
 char const* const User::CLASS_NAME = "User";
 char const* const User::FIELD_NAME_USERNAME = "username";
 
+tao::pq::binary User::hash_password(std::string const& plain) {
+	return tao::pq::to_binary(BCrypt::generateHash(plain));
+}
+
 User::User() {
 	// zero-initialize/default-construct all members
 }
 
 User::User(std::string username, std::string const& password, std::string display_name)
-	: m_username(std::move(username)), m_password(BCrypt::generateHash(password)), m_display_name(std::move(display_name)) {
-	ThreadLocal::conn->execute(SQL_CREATE, m_username, m_password, m_display_name);
-	auto const result = ThreadLocal::conn->execute(SQL_CREATE_GET_ID, m_username);
-	assert(result.size() == 1);
-	m_id = result[0][0].as<decltype(m_id)>();
-}
-
-User::User(id_t id, std::string username, std::string password, std::string display_name)
-	: m_id(std::move(id)), m_username(std::move(username)), m_password(std::move(password)), m_display_name(std::move(display_name)) {
-	assert(m_password.size() == PASSWORD_HASH_LENGTH);
+	: m_username(std::move(username)), m_password(hash_password(password)), m_display_name(std::move(display_name)) {
+	try {
+		ThreadLocal::conn->execute(SQL_CREATE, m_username, m_password, m_display_name);
+		auto const result = ThreadLocal::conn->execute(SQL_CREATE_GET_ID, m_username);
+		assert(result.size() == 1);
+		m_id = result[0][0].as<decltype(m_id)>();
+	} catch (std::runtime_error const& e) {
+		// harrumph
+		if (strstr(e.what(), "duplicate key value violates unique constraint")) {
+			throw ORM::ConstraintException{ CLASS_NAME, FIELD_NAME_USERNAME };
+		} else {
+			throw;
+		}
+	}
 }
 
 User::~User() {
@@ -62,7 +70,7 @@ std::optional<User> User::get_by_id(id_t const id) {
 		return User{
 			id,
 			result["username"].as<std::string>(),
-			result["password"].as<std::string>(),
+			result["password"].as<tao::pq::binary>(),
 			result["display_name"].as<std::string>(),
 		};
 	} else {
@@ -77,7 +85,7 @@ std::optional<User> User::get_by_name(std::string_view const username) {
 		return User{
 			result["id"].as<id_t>(),
 			std::string{ username },
-			result["password"].as<std::string>(),
+			result["password"].as<tao::pq::binary>(),
 			result["display_name"].as<std::string>(),
 		};
 	} else {
@@ -89,7 +97,7 @@ std::vector<User, PrivateAllocator<User>> User::get_by_display_name(std::string_
 	std::vector<User, PrivateAllocator<User>> ret;
 	ret.reserve(results.size());
 	for (auto const& row : results) {
-		ret.emplace_back(row["id"].as<id_t>(), row["username"].as<std::string>(), row["password"].as<std::string>(), std::string{ display_name });
+		ret.emplace_back(row["id"].as<id_t>(), row["username"].as<std::string>(), row["password"].as<tao::pq::binary>(), std::string{ display_name });
 	}
 	return ret;
 }
