@@ -43,7 +43,7 @@ auto connect_to_db() {
 
 auto connect_to_memcached() {
 	namespace C = MemcachedConfig;
-	auto conn = std::make_unique<memcache::Memcache>(C::sock_path);
+	auto conn = std::make_unique<memcache::Memcache>(C::flags);
 	if (conn->error()) {
 		throw ConnectionError{ ConnectionError::Service::memcached, memcached_last_error_message(conn->getImpl()) };
 	}

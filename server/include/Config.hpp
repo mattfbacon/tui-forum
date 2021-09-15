@@ -15,5 +15,5 @@ static constexpr bool const USE_SSL = false;
 }  // namespace WebConfig
 
 namespace MemcachedConfig {
-extern std::string const sock_path;
+extern std::string const flags;
 }

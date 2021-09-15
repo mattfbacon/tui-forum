@@ -8,5 +8,5 @@ std::string const password = "test";
 }  // namespace SqlConfig
 
 namespace MemcachedConfig {
-std::string const sock_path = "/run/memcached/memcache.sock";
+std::string const flags = "--SOCKET=\"/run/memcached/memcache.sock\"";
 }
