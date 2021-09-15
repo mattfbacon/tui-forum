@@ -14,7 +14,7 @@ namespace {
 struct UserPatch {
 	std::optional<std::string> password;
 	std::optional<std::string> display_name;
-	MSGPACK_DEFINE(password, display_name)
+	MSGPACK_DEFINE_MAP(password, display_name)
 };
 }  // namespace
 

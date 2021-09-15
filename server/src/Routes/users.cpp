@@ -13,7 +13,7 @@ struct UserCreationData {
 	std::string username;
 	std::string password;
 	std::string display_name;
-	MSGPACK_DEFINE(username, password, display_name)
+	MSGPACK_DEFINE_MAP(username, password, display_name)
 };
 }  // namespace
 

@@ -81,7 +81,7 @@ protected:
 	static char const* const CLASS_NAME;
 	static char const* const FIELD_NAME_USERNAME;
 public:
-	MSGPACK_DEFINE(m_id, m_username, m_display_name)
+	MSGPACK_DEFINE_MAP(MSGPACK_NVP("id", m_id), MSGPACK_NVP("username", m_username), MSGPACK_NVP("display_name", m_display_name))
 };
 
 }  // namespace ORM
