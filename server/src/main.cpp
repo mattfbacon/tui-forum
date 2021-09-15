@@ -84,6 +84,7 @@ void listen_callback(us_listen_socket_t* const) {
 }
 
 void create_server(unsigned int const thread_id) {
+	static std::mutex error_mutex;
 	ThreadLocal::tid = thread_id;
 	try {
 		if (ThreadLocal::conn.get() == nullptr) {
@@ -93,6 +94,7 @@ void create_server(unsigned int const thread_id) {
 			ThreadLocal::cache = connect_to_memcached();
 		}
 	} catch (ConnectionError const& e) {
+		std::lock_guard _lock{ error_mutex };
 		if (isatty(fileno(stderr))) {
 			std::clog << "\x1b[0G";
 		}
