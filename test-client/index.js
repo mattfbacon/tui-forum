@@ -32,7 +32,7 @@ const repl = () => {
 		const split = cmd.split(' ');
 		const method = split[0].toUpperCase();
 		const url = decodeURIComponent(split[1]);
-		const content = eval(cmd.slice(method.length + 1 + split[1].length + 1));
+		const content = eval(`(${cmd.slice(method.length + 1 + split[1].length + 1)})`);
 		let fetch_response;
 		try {
 			fetch_response = await fetch('http://localhost:9000' + url, { method, ...(method == 'GET' || method == 'HEAD' ? {} : { body: encode(content) }) });
