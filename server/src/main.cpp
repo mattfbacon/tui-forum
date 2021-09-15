@@ -14,7 +14,8 @@ struct ConnectionError : public std::exception {
 		memcached,
 	};
 	Service service;
-	ConnectionError(Service const service) : service(service) {}
+	std::string why;
+	ConnectionError(Service const service, std::string why = "") : service(service), why(std::move(why)) {}
 	char const* what() const noexcept override {
 		return "ConnectionError";
 	}
@@ -36,7 +37,7 @@ auto connect_to_db() {
 		auto const conn = tao::pq::connection::create(std::string{ "host=" } + C::host + " dbname=" + C::database + " user=" + C::username + " password=" + C::password);
 		return conn;
 	} catch (std::runtime_error const& e) {
-		throw ConnectionError{ ConnectionError::Service::postgresql };
+		throw ConnectionError{ ConnectionError::Service::postgresql, e.what() };
 	}
 }
 
@@ -44,7 +45,7 @@ auto connect_to_memcached() {
 	namespace C = MemcachedConfig;
 	auto conn = std::make_unique<memcache::Memcache>(C::sock_path);
 	if (conn->error()) {
-		throw ConnectionError{ ConnectionError::Service::memcached };
+		throw ConnectionError{ ConnectionError::Service::memcached, memcached_last_error_message(conn->getImpl()) };
 	}
 	return conn;
 }
@@ -98,7 +99,8 @@ void create_server(unsigned int const thread_id) {
 		if (isatty(fileno(stderr))) {
 			std::clog << "\x1b[0G";
 		}
-		std::clog << "Could not connect to " << e.service_name() << "; is the service running? " << std::endl;
+		std::clog << "Could not connect to " << e.service_name() << "; is the service running?\n";
+		std::clog << "Error message: " << e.why << std::endl;
 		_exit(EXIT_FAILURE);
 	}
 	Routes::register_all(uWS::App{}).listen(WebConfig::PORT, listen_callback).run();
