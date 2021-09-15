@@ -6,4 +6,4 @@
 	url = https://github.com/mattfbacon/TermOx.git
 [submodule "server/lib/taopq"]
 	path = server/lib/taopq
-	url = https://github.com/mattfbacon/taopq.git
+	url = https://github.com/taocpp/taopq.git
