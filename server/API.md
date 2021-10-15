@@ -12,13 +12,10 @@ interface SessionPostData {
 }
 type SessionPostFailureReason = "invalid credentials";
 
-type hash = std::array<char, 64>;
-
 interface User {
 	// core data
 	id: UserKey;
 	username: string;
-	password: hash;
 	display_name: string;
 	// endpoint-only
 	posts: Post[];
