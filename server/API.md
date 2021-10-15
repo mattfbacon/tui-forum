@@ -29,7 +29,11 @@ interface UserCreationData {
 	display_name: string;
 	password: string;
 }
-type UserCreationFailureReason = "username taken" | "username invalid" | "display name invalid" | "password invalid";
+type UserCreationFailureReason =
+	| "username taken"
+	| "username invalid"
+	| "display name invalid"
+	| "password invalid";
 
 interface UserEditData {
 	display_name?: string;
