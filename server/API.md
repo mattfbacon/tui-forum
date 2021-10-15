@@ -88,6 +88,7 @@ A plus before the method means authentication is required; the request can fail 
 ### Indication of Completion
 
 There is a three-check system:
+
 1. Implemented on a basic level
 2. Has authorization (including `self` as ID)
 3. Verifies its operands
