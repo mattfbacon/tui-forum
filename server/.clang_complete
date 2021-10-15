@@ -32,3 +32,4 @@
 -isystem /usr/include/boost
 -iquote lib/bcrypt/include/bcrypt
 -iquote lib/bcrypt/include
+-isystem lib/recollect/include

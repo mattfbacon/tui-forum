@@ -7,3 +7,6 @@
 [submodule "server/lib/taopq"]
 	path = server/lib/taopq
 	url = https://github.com/taocpp/taopq.git
+[submodule "server/lib/recollect"]
+	path = server/lib/recollect
+	url = https://github.com/mattfbacon/librecollect.git

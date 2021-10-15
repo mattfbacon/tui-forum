@@ -105,5 +105,6 @@ target_include_directories(msgpack INTERFACE SYSTEM /usr/include/boost)
 
 include(${DIR_LIB}/bcrypt.cmake)
 include(${DIR_LIB}/taopq.cmake)
+include(${DIR_LIB}/recollect.cmake)
 
-target_link_libraries(${EXECUTABLE_NAME} PRIVATE uwebsockets taopq msgpack bcrypt memcached)
+target_link_libraries(${EXECUTABLE_NAME} PRIVATE uwebsockets taopq msgpack bcrypt recollect)
