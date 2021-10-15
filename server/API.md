@@ -3,8 +3,11 @@
 ## Data structures
 
 ```ts
+type Token = string; // base-64 encoded
+
 interface SessionData {
 	id: UserKey;
+	token: Token;
 }
 interface SessionPostData {
 	username: string;
@@ -98,7 +101,7 @@ A lack of any `✓`s or `x`s implies three `x`s.
 ```
 GET /users/session : 200 SessionData | 404 (not logged in)
 POST /users/session SessionPostData : 201 SessionData (new session from logged-out state) | 205 SessionData (session replaced) | 422 SessionPostFailureReason
-DELETE /users/session : 204 (logged out, will contain cookie delete header) | 404 (not logged in)
+DELETE /users/session : 204 (logged out) | 404 (not logged in)
 
 >> where id is a natural number or "self" for the current user (using self adds 401 to the responses):
 ✓xx GET /users/id/:id : 200 User | 404
