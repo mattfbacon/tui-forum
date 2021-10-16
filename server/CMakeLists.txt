@@ -28,6 +28,7 @@ set (sources
 	ORM/ConstraintException.cpp
 	main.cpp
 	HTTP.cpp
+	Hash.cpp
 	)
 
 project(${PROJECT_NAME} VERSION 0.1 LANGUAGES C CXX)
@@ -96,13 +97,8 @@ set_property(TARGET ${EXECUTABLE_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${${PR
 
 # Extra Stuff Starts Here
 
-add_library(uwebsockets INTERFACE)
-target_link_libraries(uwebsockets INTERFACE usockets deflate ssl crypto z)
-
-add_library(msgpack INTERFACE)
-target_include_directories(msgpack INTERFACE SYSTEM /usr/include/boost)
-# target_include_directories(msgpack INTERFACE /usr/include/msgpack)
-
+include(${DIR_LIB}/uwebsockets.cmake)
+include(${DIR_LIB}/msgpack.cmake)
 include(${DIR_LIB}/bcrypt.cmake)
 include(${DIR_LIB}/taopq.cmake)
 include(${DIR_LIB}/recollect.cmake)
