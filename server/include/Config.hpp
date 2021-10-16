@@ -19,3 +19,7 @@ static constexpr bool const USE_SSL = false;
 namespace MemcachedConfig {
 extern std::vector<recollect::ConnectionMeans> const means;
 }
+
+namespace SecurityConfig {
+static constexpr size_t const TOKEN_SIZE = 60;
+}
