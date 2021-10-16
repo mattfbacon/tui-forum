@@ -1,6 +1,8 @@
 #pragma once
 
+#include <recollect.hpp>
 #include <string>
+#include <vector>
 
 namespace SqlConfig {
 extern std::string const host;
@@ -15,5 +17,5 @@ static constexpr bool const USE_SSL = false;
 }  // namespace WebConfig
 
 namespace MemcachedConfig {
-extern std::string const flags;
+extern std::vector<recollect::ConnectionMeans> const means;
 }

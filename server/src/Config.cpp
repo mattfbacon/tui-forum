@@ -8,5 +8,9 @@ std::string const password = "test";
 }  // namespace SqlConfig
 
 namespace MemcachedConfig {
-std::string const flags = "--SOCKET=\"/run/memcached/memcache.sock\"";
-}
+using recollect::ConnectionMeans;
+std::vector<ConnectionMeans> const means{
+	ConnectionMeans::unix_socket("/run/memcached/memcache.sock"),
+	ConnectionMeans::tcp(),
+};
+}  // namespace MemcachedConfig

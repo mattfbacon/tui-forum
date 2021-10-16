@@ -1,5 +1,5 @@
 #include <iostream>
-#include <libmemcached/memcached.hpp>
+#include <recollect.hpp>
 #include <tao/pq/connection.hpp>
 #include <uWebSockets/App.h>
 
@@ -42,12 +42,7 @@ auto connect_to_db() {
 }
 
 auto connect_to_memcached() {
-	namespace C = MemcachedConfig;
-	auto conn = std::make_unique<memcache::Memcache>(C::flags);
-	if (conn->error()) {
-		throw ConnectionError{ ConnectionError::Service::memcached, memcached_last_error_message(conn->getImpl()) };
-	}
-	return conn;
+	return std::make_unique<recollect::Memcache>(MemcachedConfig::means);
 }
 
 class ThreadInfo {
