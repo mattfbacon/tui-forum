@@ -109,8 +109,8 @@ IndentWrappedFunctionNames: false
 InsertTrailingCommas: None # wish this could be "always"...
 KeepEmptyLinesAtTheStartOfBlocks: true
 # LambdaBodyIndentation: Signature
-MacroBlockBegin: '' # change?
-MacroBlockEnd: '' # change?
+MacroBlockBegin: '^ROUTE_IMPL_BEGIN$' # change?
+MacroBlockEnd: '^ROUTE_IMPL_END$' # change?
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 NamespaceMacros: []
