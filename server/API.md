@@ -13,7 +13,6 @@ interface SessionPostData {
 	username: string;
 	password: string;
 }
-type SessionPostFailureReason = "invalid credentials";
 
 interface User {
 	// core data
@@ -101,7 +100,7 @@ A lack of any `✓`s or `x`s implies three `x`s.
 
 ```
 GET /users/session : 200 SessionData | 404 (not logged in)
-POST /users/session SessionPostData : 201 SessionData (new session from logged-out state) | 205 SessionData (session replaced) | 422 SessionPostFailureReason
+POST /users/session SessionPostData : 201 SessionData (new session from logged-out state) | 205 SessionData (session replaced) | 403 Forbidden (invalid credentials)
 DELETE /users/session : 204 (logged out) | 404 (not logged in)
 
 >> where id is a natural number or "self" for the current user (using self adds 401 to the responses):
