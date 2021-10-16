@@ -7,6 +7,8 @@ type Token = string; // base-64 encoded
 
 interface SessionData {
 	id: UserKey;
+}
+interface SessionCreationData {
 	token: Token;
 }
 interface SessionPostData {
@@ -100,7 +102,7 @@ A lack of any `✓`s or `x`s implies three `x`s.
 
 ```
 GET /users/session : 200 SessionData | 404 (not logged in)
-POST /users/session SessionPostData : 201 SessionData (new session from logged-out state) | 205 SessionData (session replaced) | 403 Forbidden (invalid credentials)
+POST /users/session SessionPostData : 200 SessionCreationData | 403 Forbidden (invalid credentials)
 DELETE /users/session : 204 (logged out) | 404 (not logged in)
 
 >> where id is a natural number or "self" for the current user (using self adds 401 to the responses):
