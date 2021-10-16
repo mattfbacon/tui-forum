@@ -3,7 +3,7 @@
 ## Data structures
 
 ```ts
-type Token = string; // base-64 encoded
+type Token = string; // arbitrary 8-bit data
 
 interface SessionData {
 	id: UserKey;
