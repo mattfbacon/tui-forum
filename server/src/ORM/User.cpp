@@ -1,4 +1,3 @@
-#include <bcrypt/BCrypt.hpp>
 #include <memory>
 #include <tao/pq/connection.hpp>
 
@@ -23,16 +22,12 @@ std::string const User::SQL_DELETE_BY_ID = "delete from users where id = $1";
 char const* const User::CLASS_NAME = "User";
 char const* const User::FIELD_NAME_USERNAME = "username";
 
-tao::pq::binary User::hash_password(std::string const& plain) {
-	return tao::pq::to_binary(BCrypt::generateHash(plain));
-}
-
 User::User() {
 	// zero-initialize/default-construct all members
 }
 
 User::User(std::string username, std::string const& password, std::string display_name)
-	: m_username(std::move(username)), m_password(hash_password(password)), m_display_name(std::move(display_name)) {
+	: m_username(std::move(username)), m_password(Hash::hash(password)), m_display_name(std::move(display_name)) {
 	try {
 		ThreadLocal::conn->execute(SQL_CREATE, m_username, m_password, m_display_name);
 		auto const result = ThreadLocal::conn->execute(SQL_CREATE_GET_ID, m_username);

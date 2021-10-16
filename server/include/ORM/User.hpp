@@ -7,6 +7,7 @@
 #include <tao/pq/binary.hpp>
 #include <vector>
 
+#include "Hash.hpp"
 #include "PrivateAllocator.hpp"
 
 // #include "ORM/Post.hpp"
@@ -34,10 +35,14 @@ public:
 	inline auto const& password() const {
 		return m_password;
 	}
-	inline void set_password(std::string const& value) {
-		m_password = hash_password(value);
+	void set_password(std::string_view const value) {
+		m_password = Hash::hash(value);
 		password_dirty = true;
 	}
+	bool check_password(std::string_view const value) const {
+		return Hash::check(value, m_password);
+	}
+
 	inline auto const& display_name() const {
 		return m_display_name;
 	}
@@ -53,7 +58,6 @@ public:
 	static std::vector<User, PrivateAllocator<User>> get_by_display_name(std::string_view const display_name);
 	static bool delete_by_id(id_t id);
 	static std::optional<id_t> id_from_param(std::string_view const param, ORM::User::id_t const self_id);
-	static tao::pq::binary hash_password(std::string const& plain);
 protected:
 	User(id_t id, std::string username, tao::pq::binary password, std::string display_name)
 		: m_id(std::move(id)), m_username(std::move(username)), m_password(std::move(password)), m_display_name(std::move(display_name)) {
