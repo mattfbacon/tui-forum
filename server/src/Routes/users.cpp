@@ -22,7 +22,7 @@ ROUTE_IMPL_BEGIN(post, res, )
 		try {
 			// object handle must stay in scope while we work on the object
 			msgpack::object_handle oh = msgpack::unpack(msgpack_data.data(), msgpack_data.size());
-			msgpack::object obj = *oh;
+			msgpack::object const& obj = *oh;
 			UserCreationData data;
 			obj.convert(data);
 			// create user

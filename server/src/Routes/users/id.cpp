@@ -43,7 +43,7 @@ ROUTE_IMPL_BEGIN(param_patch, res, req)
 	read_from(res, [res, &user](std::string_view const msgpack_data) mutable {
 		// object handle must stay in scope while we work on the object
 		msgpack::object_handle oh = msgpack::unpack(msgpack_data.data(), msgpack_data.size());
-		msgpack::object obj = *oh;
+		msgpack::object const& obj = *oh;
 		UserPatch patch;
 		obj.convert(patch);  // FIXME: does this throw??? no documentation...
 		if (patch.password.has_value()) {
