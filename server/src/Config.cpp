@@ -11,6 +11,5 @@ namespace MemcachedConfig {
 using recollect::ConnectionMeans;
 std::vector<ConnectionMeans> const means{
 	ConnectionMeans::unix_socket("/run/memcached/memcache.sock"),
-	ConnectionMeans::tcp(),
 };
 }  // namespace MemcachedConfig
