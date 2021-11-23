@@ -11,4 +11,5 @@ thread_local std::shared_ptr<tao::pq::connection> conn;
 thread_local std::unique_ptr<recollect::Memcache> cache;
 // thread ID
 thread_local unsigned int tid;
+thread_local std::random_device random_device;
 }  // namespace ThreadLocal
