@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bcrypt/bcrypt.h>
 #include <msgpack.hpp>
 #include <msgpack/adaptor/int.hpp>
 #include <optional>
@@ -17,7 +18,7 @@ namespace ORM {
 class User final {
 public:
 	using id_t = uint64_t;
-	static size_t constexpr PASSWORD_HASH_LENGTH = 60;
+	static size_t constexpr PASSWORD_HASH_LENGTH = BCRYPT_HASHSIZE;
 	friend class PrivateAllocator<User>;
 public:
 	User();
