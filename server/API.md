@@ -101,9 +101,9 @@ Even if an item doesn't have authorization/verification, I will put an `x`, and 
 A lack of any `✓`s or `x`s implies three `x`s.
 
 ```
-GET /users/session : 200 SessionData | 404 (not logged in)
-POST /users/session SessionPostData : 200 SessionCreationData | 403 Forbidden (invalid credentials)
-DELETE /users/session : 204 (logged out) | 404 (not logged in)
+✓✓✓ GET /users/session : 200 SessionData | 404 (not logged in)
+✓✓✓ POST /users/session SessionPostData : 200 SessionCreationData | 403 Forbidden (invalid credentials)
+✓✓✓ DELETE /users/session : 204 (logged out) | 404 (not logged in)
 
 >> where id is a natural number or "self" for the current user (using self adds 401 to the responses):
 ✓xx GET /users/id/:id : 200 User | 404
