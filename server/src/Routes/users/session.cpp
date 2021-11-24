@@ -1,3 +1,4 @@
+#include <chrono>
 #include <recollect.hpp>
 
 #include "Config.hpp"
@@ -77,7 +78,12 @@ ROUTE_IMPL_BEGIN(post, res, req)
 		// output
 		// create token and insert into cache
 		SessionCreationData output_data{ create_token() };
-		ThreadLocal::cache->set(std::string_view{ reinterpret_cast<char const*>(output_data.token.c_str()), output_data.token.size() }, input_data.username);
+		ThreadLocal::cache->set(
+			std::string_view{ reinterpret_cast<char const*>(output_data.token.c_str()), output_data.token.size() },
+			input_data.username,
+			recollect::OverwriteBehavior::require_not,
+			0,
+			std::chrono::seconds{ std::chrono::days{ 30 } }.count());
 		// send token
 		res->writeStatus(HTTP_STATUS(HTTP::Status::OK));
 		HTTP::ResponseWrapper wrapper{ res };
