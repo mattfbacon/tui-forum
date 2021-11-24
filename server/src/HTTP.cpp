@@ -1,5 +1,7 @@
 #include "HTTP.hpp"
 
+#include "threadlocal.hpp"
+
 namespace HTTP {
 
 namespace Status {
@@ -30,6 +32,18 @@ void send_code_handler(Response& res, Status::code_t const code) {
 	res.writeStatus(HTTP_STATUS(code));
 	res.write(HTTP_STATUS(code));
 	res.end();
+}
+
+std::optional<std::string> resolve_bearer(Request* const req) {
+	auto const token_sv = req->getHeader("bearer");
+	if (token_sv.empty()) {
+		return std::nullopt;
+	}
+	auto const user_for_token = ThreadLocal::cache->get(token_sv);
+	if (!user_for_token.has_value()) {
+		return std::nullopt;
+	}
+	return std::string{ user_for_token.sv() };
 }
 
 }  // namespace HTTP

@@ -50,18 +50,14 @@ std::string create_token() {
 std::string const path = "/users/session";
 
 ROUTE_IMPL_BEGIN(get, res, req)
-	auto const token_sv = req->getHeader("bearer");
-	if (token_sv.empty()) {
-		return HTTP::send_code_handler(*res, HTTP::Status::NOT_FOUND);
-	}
-	auto const user_for_token = ThreadLocal::cache->get(token_sv);
-	if (!user_for_token.has_value()) {
+	auto maybe_user_for_token = HTTP::resolve_bearer(req);
+	if (!maybe_user_for_token.has_value()) {
 		return HTTP::send_code_handler(*res, HTTP::Status::NOT_FOUND);
 	}
 
 	HTTP::ResponseWrapper wrapper{ res };
 	msgpack::packer packer{ wrapper };
-	packer.pack(UserForTokenResponse{ std::string{ user_for_token.sv() } });
+	packer.pack(UserForTokenResponse{ std::move(*maybe_user_for_token) });
 	res->end();
 ROUTE_IMPL_END
 

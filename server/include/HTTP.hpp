@@ -103,6 +103,9 @@ std::optional<StringType> decode_uri(std::string_view const encoded) requires IS
 	return { out_data };
 }
 
+// this should be Request const*, but uWebSockets did not mark getHeader as const
+std::optional<std::string> resolve_bearer(Request* req);
+
 }  // namespace HTTP
 
 #define HTTP_STATUS(VAL) HTTP::Status::strings.at(VAL)
