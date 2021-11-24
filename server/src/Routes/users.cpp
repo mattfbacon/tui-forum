@@ -37,6 +37,8 @@ ROUTE_IMPL_BEGIN(post, res, )
 				res->writeStatus(HTTP_STATUS(HTTP::Status::UNPROCESSABLE_ENTITY));
 				res->write("Username taken");
 				res->end();
+			} else {
+				throw;
 			}
 		}
 	});
