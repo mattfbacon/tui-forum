@@ -102,12 +102,12 @@ bool User::delete_by_id(id_t const id) {
 	return results.rows_affected() == 1;
 }
 
-std::optional<User::id_t> User::id_from_param(std::string_view const param, User::id_t const self_id) {
+std::optional<User::id_t> User::id_from_param(std::string_view const param) {
 	auto const maybe_user_id = util::sv_to_number<ORM::User::id_t>(param);
 	if (maybe_user_id.has_value()) {
 		return maybe_user_id;
 	} else if (param == Strings::SELF) {
-		return self_id;
+		return SELF_ID;
 	} else {
 		return std::nullopt;
 	}

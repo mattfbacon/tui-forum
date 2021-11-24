@@ -27,7 +27,7 @@ std::string const param_path = "/users/id/:id";
 ROUTE_IMPL_BEGIN(param_get, res, req)
 #warning "No self!"
 	// TODO: add self
-	auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0), /* self here */ 0), HTTP::Status::NOT_FOUND);
+	auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0)), HTTP::Status::NOT_FOUND);
 	auto const user = HTTP::unwrap(ORM::User::get_by_id(user_id), HTTP::Status::NOT_FOUND);
 	HTTP::ResponseWrapper wrapper{ res };
 	msgpack::packer packer{ wrapper };
@@ -36,7 +36,7 @@ ROUTE_IMPL_BEGIN(param_get, res, req)
 ROUTE_IMPL_END
 
 ROUTE_IMPL_BEGIN(param_patch, res, req)
-	auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0), /* self here */ 0), HTTP::Status::NOT_FOUND);
+	auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0)), HTTP::Status::NOT_FOUND);
 	auto user = HTTP::unwrap(ORM::User::get_by_id(user_id), HTTP::Status::NOT_FOUND);
 // TODO when auth is added: check that id is the user's id, otherwise send 403
 #warning "No auth!"

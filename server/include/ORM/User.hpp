@@ -18,6 +18,7 @@ namespace ORM {
 class User final {
 public:
 	using id_t = uint64_t;
+	static id_t constexpr SELF_ID = 0;
 	static size_t constexpr PASSWORD_HASH_LENGTH = BCRYPT_HASHSIZE;
 	friend class PrivateAllocator<User>;
 public:
@@ -58,7 +59,7 @@ public:
 	static std::optional<User> get_by_name(std::string_view const username);
 	static std::vector<User, PrivateAllocator<User>> get_by_display_name(std::string_view const display_name);
 	static bool delete_by_id(id_t id);
-	static std::optional<id_t> id_from_param(std::string_view const param, ORM::User::id_t const self_id);
+	static std::optional<id_t> id_from_param(std::string_view const param);
 protected:
 	User(id_t id, std::string username, tao::pq::binary password, std::string display_name)
 		: m_id(std::move(id)), m_username(std::move(username)), m_password(std::move(password)), m_display_name(std::move(display_name)) {
