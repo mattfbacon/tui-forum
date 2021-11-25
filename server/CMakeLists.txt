@@ -41,52 +41,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 
-# Linker/Compiler Flags
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-	-fuse-ld=lld \
-	")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-	-Wall -Wextra -Wno-unknown-pragmas \
-	-Wcpp \
-	-Wno-enum-compare \
-	-fno-rtti -fexceptions \
-	-DMSGPACK_DISABLE_LEGACY_CONVERT \
-	")
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto -fcolor-diagnostics \
-		-Wno-gnu-zero-variadic-macro-arguments \
-		-Wno-c++11-extensions -Wno-c++14-extensions \
-		-Wno-c++17-extensions -Wno-c++20-extensions \
-		-Wno-unused-command-line-argument \
-		")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color")
-endif()
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
-	-fno-omit-frame-pointer -fstack-protector-strong \
-	-O0 -ggdb3 -Werror -Wfatal-errors -Wno-error=cpp -Wno-error=pedantic \
-	")
-
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
-	-DNDEBUG \
-	")
-
-option(USE_ASAN "Use Address Sanitizer (Debug Only)" ON)
-if(${USE_ASAN})
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
-		-finstrument-functions \
-		-fsanitize=address -fsanitize=undefined -fsanitize=leak \
-		")
-endif()
-
-option(USE_GLIBCXX_DEBUG "STL Debug Mode (Debug Only)" ON)
-if(${USE_GLIBCXX_DEBUG})
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
-		-D_GLIBCXX_DEBUG \
-		")
-endif()
-
 list(TRANSFORM sources PREPEND ${${PROJECT_NAME}_SOURCE_DIR}/${DIR_SRC}/)
 
 add_executable(${EXECUTABLE_NAME} ${sources})
@@ -94,6 +48,64 @@ target_include_directories(${EXECUTABLE_NAME} PUBLIC ${${PROJECT_NAME}_SOURCE_DI
 target_include_directories(${EXECUTABLE_NAME} SYSTEM PRIVATE ${${PROJECT_NAME}_SOURCE_DIR}/${DIR_SYSINC})
 
 set_property(TARGET ${EXECUTABLE_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${${PROJECT_NAME}_SOURCE_DIR}/${DIR_DIST}")
+
+target_compile_options(${EXECUTABLE_NAME} PRIVATE
+-Wall -Wextra
+-Wno-unknown-pragmas
+-Wcpp -Wshadow -Wundef
+-fno-common -Wconversion
+-Wno-enum-compare
+-frtti -fexceptions
+
+"$<$<CXX_COMPILER_ID:GNU>:\
+-fdiagnostics-color\
+>"
+
+"$<$<CXX_COMPILER_ID:Clang>:\
+-fcolor-diagnostics;\
+-Wno-gnu-zero-variadic-macro-arguments;\
+-Wno-c++11-extensions;-Wno-c++14-extensions;-Wno-c++17-extensions;-Wno-c++20-extensions;\
+-Wno-unused-command-line-argument\
+>"
+
+"$<$<CONFIG:Debug>:\
+-fno-omit-frame-pointer;\
+-fstack-protector-all;\
+-fstack-clash-protection;\
+-O0;\
+-ggdb3;\
+-Werror;\
+-Wfatal-errors;\
+-Wno-error=cpp;\
+-Wno-error=pedantic;\
+-fasynchronous-unwind-tables;\
+-finstrument-functions;\
+-fsanitize=address;\
+-fsanitize=undefined;\
+-fsanitize=leak\
+>")
+
+target_compile_definitions(${EXECUTABLE_NAME} PRIVATE
+"MSGPACK_DISABLE_LEGACY_CONVERT"
+
+"$<$<CONFIG:Release>:\
+NDEBUG\
+>"
+
+"$<$<CONFIG:Debug>:\
+_GLIBCXX_DEBUG;\
+_GLIBCXX_ASSERTIONS\
+>")
+
+target_link_options(${EXECUTABLE_NAME} PRIVATE
+"-Wl,-pie,-z,defs,-z,now,-z,relro"
+"-fuse-ld=lld"
+
+"$<$<CONFIG:Debug>:\
+-fsanitize=address;\
+-fsanitize=undefined;\
+-fsanitize=leak\
+>")
 
 # Extra Stuff Starts Here
 
