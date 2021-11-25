@@ -20,7 +20,7 @@ public:
 	using id_t = uint64_t;
 	static id_t constexpr SELF_ID = 0;
 	static size_t constexpr PASSWORD_HASH_LENGTH = BCRYPT_HASHSIZE;
-	friend class PrivateAllocator<User>;
+	friend struct PrivateAllocator<User>;
 public:
 	User();
 	// create a user
