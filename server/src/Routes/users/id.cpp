@@ -59,12 +59,12 @@ ROUTE_IMPL_BEGIN(param_patch, res, req)
 		msgpack::object_handle oh = msgpack::unpack(msgpack_data.data(), msgpack_data.size());
 		msgpack::object const& obj = *oh;
 		UserPatch patch;
-		obj.convert(patch);  // FIXME: does this throw??? no documentation...
+		obj.convert(patch);
 		if (patch.password.has_value()) {
-			user.set_password(BCrypt::generateHash(*patch.password));
+			user.set_password(*patch.password);
 		}
 		if (patch.display_name.has_value()) {
-			user.set_display_name(*patch.display_name);
+			user.set_display_name(std::move(*patch.display_name));
 		}
 		user.save();
 		HTTP::ResponseWrapper wrapper{ res };

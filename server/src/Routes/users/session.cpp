@@ -63,7 +63,8 @@ ROUTE_IMPL_BEGIN(get, res, req)
 ROUTE_IMPL_END
 
 ROUTE_IMPL_BEGIN(post, res, req)
-	read_from(res, [req, res](std::string_view const msgpack_data) {
+	(void)req;
+	read_from(res, [res](std::string_view const msgpack_data) {
 		// input
 		// unpack data
 		auto handle = msgpack::unpack(msgpack_data.data(), msgpack_data.size());
