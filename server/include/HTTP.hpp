@@ -29,17 +29,17 @@ using Response = uWS::HttpResponse<WebConfig::USE_SSL>;
 
 namespace Status {
 using code_t = int;
-constexpr code_t const OK = 200;
-constexpr code_t const CREATED = 201;
-constexpr code_t const NO_CONTENT = 204;
-constexpr code_t const BAD_REQUEST = 400;
-constexpr code_t const UNAUTHORIZED = 401;
-constexpr code_t const FORBIDDEN = 403;
-constexpr code_t const NOT_FOUND = 404;
-constexpr code_t const METHOD_NOT_ALLOWED = 405;
-constexpr code_t const I_M_A_TEAPOT = 418;
-constexpr code_t const UNPROCESSABLE_ENTITY = 422;
-constexpr code_t const INTERNAL_SERVER_ERROR = 500;
+constexpr code_t OK = 200;
+constexpr code_t CREATED = 201;
+constexpr code_t NO_CONTENT = 204;
+constexpr code_t BAD_REQUEST = 400;
+constexpr code_t UNAUTHORIZED = 401;
+constexpr code_t FORBIDDEN = 403;
+constexpr code_t NOT_FOUND = 404;
+constexpr code_t METHOD_NOT_ALLOWED = 405;
+constexpr code_t I_M_A_TEAPOT = 418;
+constexpr code_t UNPROCESSABLE_ENTITY = 422;
+constexpr code_t INTERNAL_SERVER_ERROR = 500;
 extern std::unordered_map<code_t, std::string> const strings;
 }  // namespace Status
 
