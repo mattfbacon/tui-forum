@@ -11,21 +11,20 @@
 
 namespace HTTP {
 
+using Request = uWS::HttpRequest;
+using Response = uWS::HttpResponse<false>;
+
 // this is necessary because uWS::HttpResponse does not have a write signature that is compatible with standard streams, instead taking a std::string_view. Hence, this wrapper simply constructs one from the data and size (exposing the proper signature), and passes it to the HttpResponse write function.
-template <bool SSL>
 class ResponseWrapper {
 public:
 	// non-owning pointer
-	ResponseWrapper(uWS::HttpResponse<SSL>* res) : res(res) {}
+	ResponseWrapper(Response* res) : res(res) {}
 	ResponseWrapper& write(char const* const data, size_t const size) {
 		res->write(std::string_view{ data, size });
 		return *this;
 	}
-	uWS::HttpResponse<SSL>* res;
+	Response* res;
 };
-
-using Request = uWS::HttpRequest;
-using Response = uWS::HttpResponse<WebConfig::USE_SSL>;
 
 namespace Status {
 using code_t = int;

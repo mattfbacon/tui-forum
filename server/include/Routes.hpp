@@ -49,7 +49,7 @@ using Route = void(Response* res, Request* req);
 #define REGISTERER(NAME) ROUTES_CUSTOM_REGISTERER_IMPL(NAME, )
 #define ROUTE(NAME) extern Route NAME __attribute__((nonnull(1, 2)));
 
-void read_from(uWS::HttpResponse<WebConfig::USE_SSL>* res, std::function<void(std::string_view const)> handler);
+void read_from(Response* res, std::function<void(std::string_view const)> handler);
 
 namespace users {
 

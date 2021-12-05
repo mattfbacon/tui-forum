@@ -2,7 +2,7 @@
 #include "Routes.hpp"
 
 namespace Routes {
-void read_from(uWS::HttpResponse<WebConfig::USE_SSL>* const res, std::function<void(std::string_view const)> handler) {
+void read_from(HTTP::Response* const res, std::function<void(std::string_view const)> handler) {
 	std::string storage;
 	res
 		->onAborted([res]() {
