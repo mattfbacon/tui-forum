@@ -117,6 +117,7 @@ void create_server(unsigned int const thread_id) {
 }
 
 int main() {
+	Config::load_from_env();
 	std::clog << "Using " << thread_info.get_goal_num() << " threads." << std::endl;
 	if (isatty(fileno(stderr))) {
 		std::clog << "Status: \x1b[34m";

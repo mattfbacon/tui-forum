@@ -26,4 +26,6 @@ namespace Security {
 constexpr size_t TOKEN_SIZE = 60;
 }
 
+void load_from_env();
+
 }  // namespace Config
