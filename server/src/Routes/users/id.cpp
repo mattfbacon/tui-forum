@@ -24,11 +24,24 @@ namespace id {
 
 std::string const param_path = "/users/id/:id";
 
+ORM::User resolve_user_parameter(uWS::HttpRequest* const req, unsigned short param_index, bool* resolved_with_self = nullptr) {
+	auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(param_index)), HTTP::Status::NOT_FOUND);
+	if (user_id == ORM::User::SELF_ID) {
+		std::string bearer = HTTP::unwrap(HTTP::resolve_bearer(req), HTTP::Status::UNAUTHORIZED);
+		if (resolved_with_self) {
+			*resolved_with_self = true;
+		}
+		return HTTP::unwrap(ORM::User::get_by_name(bearer), HTTP::Status::NOT_FOUND);
+	} else {
+		if (resolved_with_self) {
+			*resolved_with_self = false;
+		}
+		return HTTP::unwrap(ORM::User::get_by_id(user_id), HTTP::Status::NOT_FOUND);
+	}
+}
+
 ROUTE_IMPL_BEGIN(param_get, res, req)
-#warning "No self!"
-	// TODO: add self
-	auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0)), HTTP::Status::NOT_FOUND);
-	auto const user = HTTP::unwrap(ORM::User::get_by_id(user_id), HTTP::Status::NOT_FOUND);
+	auto const user = resolve_user_parameter(req, 0);
 	HTTP::ResponseWrapper wrapper{ res };
 	msgpack::packer packer{ wrapper };
 	packer.pack(user);
@@ -36,10 +49,11 @@ ROUTE_IMPL_BEGIN(param_get, res, req)
 ROUTE_IMPL_END
 
 ROUTE_IMPL_BEGIN(param_patch, res, req)
-	auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0)), HTTP::Status::NOT_FOUND);
-	auto user = HTTP::unwrap(ORM::User::get_by_id(user_id), HTTP::Status::NOT_FOUND);
-// TODO when auth is added: check that id is the user's id, otherwise send 403
-#warning "No auth!"
+	auto user = HTTP::unwrap(ORM::User::get_by_name(HTTP::unwrap(HTTP::resolve_bearer(req), HTTP::Status::UNAUTHORIZED)), HTTP::Status::NOT_FOUND);
+	// if an explicit ID was provided and that ID doesn't match the ID of the logged-in user, deny access
+	if (auto const provided_id = ORM::User::id_from_param(req->getParameter(0)); provided_id != ORM::User::SELF_ID && user.id() != provided_id) {
+		return HTTP::send_code_handler(*res, HTTP::Status::FORBIDDEN);
+	}
 	read_from(res, [res, &user](std::string_view const msgpack_data) mutable {
 		// object handle must stay in scope while we work on the object
 		msgpack::object_handle oh = msgpack::unpack(msgpack_data.data(), msgpack_data.size());
@@ -61,15 +75,13 @@ ROUTE_IMPL_BEGIN(param_patch, res, req)
 ROUTE_IMPL_END
 
 ROUTE_IMPL_BEGIN(param_delete, res, req)
-// TODO when auth is added: add self id; check that id is the user's id, otherwise send 403
-#warning "No auth! No self!"
-	auto const user_id = HTTP::unwrap(ORM::User::id_from_param(req->getParameter(0), 0), HTTP::Status::NOT_FOUND);
-	auto const deleted = ORM::User::delete_by_id(user_id);
-	if (deleted) {
-		return HTTP::send_code_handler(*res, HTTP::Status::NO_CONTENT);
-	} else {
-		throw HTTP::StatusException{ HTTP::Status::NOT_FOUND };
+	auto const user = HTTP::unwrap(ORM::User::get_by_name(HTTP::unwrap(HTTP::resolve_bearer(req), HTTP::Status::UNAUTHORIZED)), HTTP::Status::NOT_FOUND);
+	// if an explicit ID was provided and that ID doesn't match the ID of the logged-in user, deny access
+	if (auto const provided_id = ORM::User::id_from_param(req->getParameter(0)); provided_id != ORM::User::SELF_ID && user.id() != provided_id) {
+		return HTTP::send_code_handler(*res, HTTP::Status::FORBIDDEN);
 	}
+	auto const deleted = ORM::User::delete_by_id(user.id());
+	return HTTP::send_code_handler(*res, deleted ? HTTP::Status::NO_CONTENT : HTTP::Status::NOT_FOUND);
 ROUTE_IMPL_END
 
 ROUTES_REGISTERER_IMPL(app) {
