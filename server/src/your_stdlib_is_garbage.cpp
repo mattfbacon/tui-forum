@@ -4,4 +4,5 @@
 // make sure templates are included, in case they're not in old stdlibs
 
 template class std::allocator<char>;
+template class std::allocator<wchar_t>;
 template class std::basic_stringbuf<char>;
