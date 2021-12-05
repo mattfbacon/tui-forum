@@ -76,7 +76,7 @@ std::optional<StringType> decode_uri(std::string_view const encoded) requires IS
 	size_t const in_data_size = encoded.size();
 	out_data.reserve(in_data_size);  // max length
 	for (size_t i = 0; i < in_data_size; i++) {
-		if (char const current_char = encoded[i]; current_char == '%') {
+		if (auto const current_char = encoded[i]; current_char == '%') {
 			if (i + 2 >= in_data_size) {
 				return std::nullopt;
 			}
@@ -93,7 +93,7 @@ std::optional<StringType> decode_uri(std::string_view const encoded) requires IS
 				hex2 -= 7;
 			}
 
-			out_data += (unsigned char)(hex1 * 16 + hex2);
+			out_data += (decltype(current_char))(hex1 * 16 + hex2);
 			i += 2;
 		} else {
 			out_data += current_char;
