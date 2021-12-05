@@ -32,9 +32,10 @@ struct ConnectionError : public std::exception {
 };
 
 auto connect_to_db() {
-	namespace C = SqlConfig;
+	namespace C = Config::Sql;
 	try {
-		auto const conn = tao::pq::connection::create(std::string{ "host=" } + C::host + " dbname=" + C::database + " user=" + C::username + " password=" + C::password);
+		auto const conn = tao::pq::connection::create(
+			std::string{ "host=" } + C::host + " port=" + std::to_string(C::port) + " dbname=" + C::database + " user=" + C::username + " password=" + C::password);
 		return conn;
 	} catch (std::runtime_error const& e) {
 		throw ConnectionError{ ConnectionError::Service::postgresql, e.what() };
@@ -42,7 +43,7 @@ auto connect_to_db() {
 }
 
 auto connect_to_memcached() {
-	return std::make_unique<recollect::Memcache>(MemcachedConfig::means);
+	return std::make_unique<recollect::Memcache>(Config::Memcached::means);
 }
 
 class ThreadInfo {
@@ -70,7 +71,7 @@ public:
 			if (isatty(fileno(stderr))) {
 				std::clog << '\n';
 			}
-			std::clog << "All threads are online\nListening on port " << WebConfig::PORT << '\n';
+			std::clog << "All threads are online\nListening on port " << Config::Web::port << '\n';
 		}
 		std::clog << std::flush;
 	}
@@ -111,7 +112,7 @@ void create_server(unsigned int const thread_id) {
 		thread_info.had_error(e);
 	}
 	if (!thread_info.did_any_have_error()) {
-		Routes::register_all(uWS::App{}).listen(WebConfig::PORT, listen_callback).run();
+		Routes::register_all(uWS::App{}).listen(Config::Web::port, listen_callback).run();
 	}
 }
 

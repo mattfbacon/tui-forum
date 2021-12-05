@@ -4,22 +4,26 @@
 #include <string>
 #include <vector>
 
-namespace SqlConfig {
-extern std::string const host;
-extern std::string const database;
-extern std::string const username;
-extern std::string const password;
-}  // namespace SqlConfig
+namespace Config {
 
-namespace WebConfig {
-static constexpr int const PORT = 9000;
-static constexpr bool const USE_SSL = false;
-}  // namespace WebConfig
-
-namespace MemcachedConfig {
-extern std::vector<recollect::ConnectionMeans> const means;
+namespace Web {
+extern int port;
 }
 
-namespace SecurityConfig {
-static constexpr size_t const TOKEN_SIZE = 60;
+namespace Sql {
+extern std::string host;
+extern int port;
+extern std::string database;
+extern std::string username;
+extern std::string password;
+}  // namespace Sql
+
+namespace Memcached {
+extern std::vector<recollect::ConnectionMeans> means;
 }
+
+namespace Security {
+constexpr size_t TOKEN_SIZE = 60;
+}
+
+}  // namespace Config

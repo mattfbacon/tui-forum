@@ -1,15 +1,24 @@
 #include "Config.hpp"
 
-namespace SqlConfig {
-std::string const host = "localhost";
-std::string const database = "tuiforum";
-std::string const username = "test";
-std::string const password = "test";
-}  // namespace SqlConfig
+namespace Config {
 
-namespace MemcachedConfig {
+namespace Web {
+int port = 9000;
+}
+
+namespace Sql {
+std::string host = "localhost";
+int port = 5432;
+std::string database = "tuiforum";
+std::string username = "test";
+std::string password = "test";
+}  // namespace Sql
+
+namespace Memcached {
 using recollect::ConnectionMeans;
-std::vector<ConnectionMeans> const means{
+std::vector<ConnectionMeans> means{
 	ConnectionMeans::unix_socket("/run/memcached/memcache.sock"),
 };
-}  // namespace MemcachedConfig
+}  // namespace Memcached
+
+}  // namespace Config

@@ -33,13 +33,13 @@ struct SessionCreationData {
 template <bool CheckForUniqueness = true>
 std::string create_token() {
 	std::string ret;
-	ret.resize(SecurityConfig::TOKEN_SIZE);
+	ret.resize(Config::Security::TOKEN_SIZE);
 	do {
 		std::mt19937 rng{ ThreadLocal::random_device() };
 		// `char` as distribution type is UB, so use `short` and cast
 		// ref: https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
 		std::uniform_int_distribution<short> dist{ static_cast<short>('a'), static_cast<short>('a' + 16) };
-		for (size_t i = 0; i < SecurityConfig::TOKEN_SIZE; i++) {
+		for (size_t i = 0; i < Config::Security::TOKEN_SIZE; i++) {
 			ret[i] = static_cast<char>(dist(rng));
 		}
 	} while (!CheckForUniqueness || ThreadLocal::cache->has(ret));
