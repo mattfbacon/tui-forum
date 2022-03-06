@@ -9,7 +9,7 @@ std::string const param_path = "/users/username/:username";
 
 ROUTE_IMPL_BEGIN(param_get, res, req)
 	auto const param_username = req->getParameter(0);
-	auto const user = ORM::User::get_by_name(param_username);
+	auto const user = ORM::User::get_by_name(std::string{ param_username });
 	if (!user.has_value()) {
 		throw HTTP::StatusException{ HTTP::Status::NOT_FOUND };
 	}

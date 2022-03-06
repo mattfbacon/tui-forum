@@ -56,7 +56,7 @@ public:
 	void save();
 	// std::vector<Post> get_posts();
 	static std::optional<User> get_by_id(id_t id);
-	static std::optional<User> get_by_name(std::string_view const username);
+	static std::optional<User> get_by_name(std::string username);
 	static std::vector<User, PrivateAllocator<User>> get_by_display_name(std::string_view const display_name);
 	static bool delete_by_id(id_t id);
 	static std::optional<id_t> id_from_param(std::string_view const param);

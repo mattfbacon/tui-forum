@@ -13,8 +13,8 @@ import readline from 'readline';
 import {promisify} from 'util';
 
 const rl = readline.createInterface({
-	input : process.stdin,
-	output : process.stdout,
+	input: process.stdin,
+	output: process.stdout,
 });
 
 const rl_question = (promisify(rl.question).bind(rl) as unknown as (prompt: string) => Promise<string>);
@@ -24,10 +24,8 @@ const repl = () => {
 		[Symbol.asyncIterator](): AsyncIterator<string, undefined> {
 			return {
 				async next() {
-					return rl_question('> ')
-						.then(value => ({ done : false, value } as { done : false, value : string }))
-						.catch(() => ({ done : true, value : undefined }));
-				}
+					return rl_question('> ').then(value => ({ done: false, value } as { done: false, value: string })).catch(() => ({ done: true, value: undefined }));
+				},
 			};
 		}
 	}
@@ -39,19 +37,20 @@ interface TokenResponse {
 	token: string;
 }
 
-const is_token_response = (x: unknown): x is TokenResponse => typeof x == 'object' && typeof (x as { token : unknown }).token == 'string';
-const is_method = (x: unknown): x is FetchOptions['method'] => typeof x == 'string' && [ 'POST', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'DELETE', 'PUT' ].includes(x);
+const is_token_response = (x: unknown): x is TokenResponse => typeof x == 'object' && typeof (x as { token: unknown }).token == 'string';
+const is_method = (x: unknown): x is FetchOptions['method'] => typeof x == 'string' && ['POST', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'DELETE', 'PUT'].includes(x);
 
 async function run_command(command: string, rest: string): Promise<boolean> {
 	switch (command) {
 		case 'quit':
 		case 'exit':
-		case 'bye':
+		case 'bye': {
 			return false;
-		case 'login':
+		}
+		case 'login': {
 			const data = eval(`(${rest})`);
-			const fetch_response: FetchResponse = await fetch(
-				'http://localhost:9000/users/session', { method : 'POST', body : encode(data), headers : bearer_token ? { 'Bearer' : bearer_token } : {} });
+			const fetch_response: FetchResponse
+				= await fetch('http://localhost:9000/users/session', { method: 'POST', body: encode(data), headers: bearer_token ? { 'Bearer': bearer_token } : {} });
 			if (fetch_response.status >= 200 && fetch_response.status < 300 && fetch_response.status !== 204) {
 				const decoded = decode(await fetch_response.arrayBuffer());
 				bearer_token = is_token_response(decoded) ? decoded.token : null;
@@ -59,9 +58,11 @@ async function run_command(command: string, rest: string): Promise<boolean> {
 				console.info(await fetch_response.text());
 			}
 			return true;
-		default:
+		}
+		default: {
 			console.warn('Unknown command ' + command);
 			return true;
+		}
 	}
 }
 
@@ -88,9 +89,9 @@ async function run_command(command: string, rest: string): Promise<boolean> {
 			try {
 				fetch_response = await fetch(
 					'http://localhost:9000' + url,
-					{ method, ...(method == 'GET' || method == 'HEAD' ? {} : { body : encode(content) }), headers : bearer_token ? { 'Bearer' : bearer_token } : {} });
+					{ method, ...(method == 'GET' || method == 'HEAD' ? {} : { body: encode(content) }), headers: bearer_token ? { 'Bearer': bearer_token } : {} });
 			} catch (e) {
-				console.error((e as { toString : () => string }).toString());
+				console.error((e as { toString: () => string }).toString());
 				continue;
 			}
 			if (fetch_response.status >= 200 && fetch_response.status < 300 && fetch_response.status !== 204) {

@@ -105,7 +105,8 @@ IndentPPDirectives: None
 IndentRequires: false
 IndentWidth: 2
 IndentWrappedFunctionNames: false
-InsertTrailingCommas: None # wish this could be "always"...
+InsertTrailingCommas: Wrapped # wish this could be "always"...
+JavaScriptQuotes: Leave
 KeepEmptyLinesAtTheStartOfBlocks: true
 # LambdaBodyIndentation: Signature
 MacroBlockBegin: '^ROUTE_IMPL_BEGIN$' # change?
@@ -148,7 +149,6 @@ SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 2
 SpacesInAngles: false
 SpacesInConditionalStatement: false
-SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
 # SpacesInLineCommentPrefix:
 #   Minimum: 1
@@ -174,3 +174,6 @@ WhitespaceSensitiveMacros:
   - NS_SWIFT_NAME
   - CF_SWIFT_NAME
 ...
+---
+Language: JavaScript
+SpacesInContainerLiterals: false

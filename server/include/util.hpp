@@ -44,16 +44,16 @@ void write_sv_to_unpacker(msgpack::unpacker& unpacker, std::string_view const sv
 template <typename T, typename E, typename... EArgs>
 T& unwrap(std::optional<T>& x_opt, EArgs... e_args) {
 	if (!x_opt.has_value()) {
-		throw E{ e_args... };
+		throw E{ std::forward<EArgs>(e_args)... };
 	}
 	return *x_opt;
 }
 template <typename T, typename E, typename... EArgs>
 T&& unwrap(std::optional<T>&& x_opt, EArgs... e_args) {
 	if (!x_opt.has_value()) {
-		throw E{ e_args... };
+		throw E{ std::forward<EArgs>(e_args)... };
 	}
-	return std::move(*x_opt);
+	return *std::move(x_opt);
 }
 
 template <typename T, typename Item>

@@ -72,14 +72,14 @@ std::optional<User> User::get_by_id(id_t const id) {
 		return std::nullopt;
 	}
 }
-std::optional<User> User::get_by_name(std::string_view const username) {
+std::optional<User> User::get_by_name(std::string username) {
 	auto const results = ThreadLocal::conn->execute(SQL_FETCH_BY_USERNAME, username);
 	assert(results.size() <= 1);  // 0 or 1 entries
 	if (results.size() == 1) {
 		auto const& result = results[0];
 		return User{
 			result["id"].as<id_t>(),
-			std::string{ username },
+			std::move(username),
 			result["password"].as<tao::pq::binary>(),
 			result["display_name"].as<std::string>(),
 		};
